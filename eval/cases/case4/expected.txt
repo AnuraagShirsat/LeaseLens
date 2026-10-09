@@ -1,0 +1,2 @@
+missing │ Annexure A (Inventory of Items) is mentioned in Clause 1 but is not attached
+entry_inspection │ Landlord may enter with "reasonable notice" without saying how much notice (Clause 9)

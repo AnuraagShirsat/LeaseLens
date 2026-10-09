@@ -1,0 +1,57 @@
+RESIDENTIAL RENTAL AGREEMENT
+(Fictional sample for software testing only. No real people or places.)
+
+SUMMARY OF KEY TERMS
+Landlord:            Mr. Ravi Example
+Tenant:              Ms. Anita Sample
+Property:            Flat 202, Imaginary Apartments, 5th Cross, Example Layout, Bengaluru 560000
+Term:                11 months, from 1 November 2026 to 30 September 2027
+Monthly rent:        Rs 20,000
+Security deposit:    Rs 60,000
+Lock-in:             3 months
+Notice period:       30 days
+
+This agreement is made on 1 November 2026 at Bengaluru between Mr. Ravi Example, of 12 Sample Road, Example Layout, Bengaluru 560000 (the "Landlord") and Ms. Anita Sample (the "Tenant").
+
+The parties agree as follows:
+
+1. PARTIES AND USE
+The Landlord lets the Property to the Tenant for residential use only. The Tenant will live in the Property with immediate family members only.
+
+2. TERM
+This agreement runs for 11 months, from 1 November 2026 to 30 September 2027.
+
+3. RENT
+The Tenant will pay rent of Rs 20,000 per month, on or before the 5th day of each month, by bank transfer to the account the Landlord shares in writing. The Landlord will give a written receipt for each payment.
+
+4. SECURITY DEPOSIT
+Before taking possession, the Tenant has paid an interest-free security deposit of Rs 80,000. The Landlord acknowledges receipt of this amount.
+
+5. DEDUCTIONS AND RETURN OF THE DEPOSIT
+When the Tenant vacates, the Landlord may deduct only the cost of repairing damage beyond normal wear and tear, and any unpaid rent or charges. The Landlord will give the Tenant an itemised list of deductions with bills or photos. The balance of the deposit will be returned within 30 days after the Tenant hands over the Property.
+
+6. LOCK-IN
+Neither party may end this agreement during the first 3 months from 1 November 2026.
+
+7. NOTICE
+After the lock-in period, either party may end this agreement by giving the other 30 days' written notice.
+
+8. MAINTENANCE, REPAIRS AND UTILITIES
+The Landlord is responsible for structural repairs and for plumbing and electrical faults that are not caused by the Tenant. The Tenant is responsible for day-to-day upkeep and for repairing damage caused by the Tenant. The Tenant will pay the monthly maintenance charge of the apartment association, and electricity and water charges according to the meters.
+
+9. LANDLORD'S ENTRY
+The Landlord may enter the Property to inspect it after giving the Tenant at least 24 hours' notice, between 10 am and 6 pm. In an emergency, the Landlord may enter without notice.
+
+10. SUBLETTING
+The Tenant will not sublet the Property or transfer this agreement to anyone else without the Landlord's written consent.
+
+11. RENT ESCALATION
+The rent stays the same during the 11-month term. Any change in rent for a renewed term must be agreed in writing by both parties.
+
+12. TERMINATION
+Either party may end this agreement early if the other party seriously breaks it and does not fix the breach within 15 days of written notice. When the agreement ends, the Tenant will vacate the Property and hand over all keys to the Landlord.
+
+Signed on 1 November 2026.
+
+_______________________            _______________________
+Mr. Ravi Example (Landlord)        Ms. Anita Sample (Tenant)

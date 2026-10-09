@@ -1,0 +1,3 @@
+lock_in │ Lock-in period of 8 months out of an 11-month term (Clause 6)
+termination_notice │ Notice period of 90 days (Clause 7)
+maintenance_repairs │ Maintenance and repairs clause does not say who pays or who does what (Clause 8)
