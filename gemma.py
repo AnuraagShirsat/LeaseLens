@@ -1,3 +1,4 @@
+# gemma.py
 """Thin wrapper around Ollama's chat API.
 
 Provides two helpers:
@@ -15,19 +16,10 @@ from typing import Any, Iterable, Optional, Type, TypeVar
 import ollama
 from pydantic import BaseModel, ValidationError
 
-import config  # expects MODEL_NAME at module level
+import config
 
 
 T = TypeVar("T", bound=BaseModel)
-
-# Context window for every call. Lease documents (even a few pages) easily
-# exceed 4096 tokens once you add the schema and the JSON output, which makes
-# Ollama silently truncate and the model loop. 16k is a safe default.
-NUM_CTX = 16384
-
-# Hard cap on generated tokens per call. Prevents a looping model from
-# generating for many minutes.
-NUM_PREDICT = 4096
 
 
 class GemmaError(Exception):
@@ -103,8 +95,9 @@ def _chat(messages: list[dict], *, format: Any = None, temperature: float) -> st
             format=format,
             options={
                 "temperature": temperature,
-                "num_ctx": NUM_CTX,
-                "num_predict": NUM_PREDICT,
+                "num_ctx": config.NUM_CTX,
+                "num_predict": config.NUM_PREDICT,
+                "num_gpu": config.NUM_GPU,
             },
         )
     except Exception as e:
@@ -138,16 +131,11 @@ def _strip_code_fences(text: str) -> str:
     cleaned = text.strip()
     if not cleaned.startswith("```"):
         return cleaned
-    # Drop the opening fence line
     cleaned = cleaned.split("```", 1)[1]
-    # Drop an optional language tag on the same line (e.g. "json\n")
     if "\n" in cleaned:
         first_line, rest = cleaned.split("\n", 1)
         if first_line.strip().lower() in {"json", "json5", "jsonc"}:
             cleaned = rest
-        else:
-            cleaned = cleaned
-    # Drop the trailing fence and anything after it
     if "```" in cleaned:
         cleaned = cleaned.split("```", 1)[0]
     return cleaned.strip()
@@ -170,12 +158,7 @@ def ask_json(
     images: Optional[list[bytes]] = None,
     retries: int = 2,
 ) -> T:
-    """Ask the model and parse+validate the reply into `response_model`.
-
-    Uses Ollama's structured-output `format` parameter with the model's JSON
-    schema. If the reply fails validation, retries up to `retries` times with
-    an extra instruction to emit valid JSON only.
-    """
+    """Ask the model and parse+validate the reply into `response_model`."""
     _ensure_ready()
 
     schema = response_model.model_json_schema()
