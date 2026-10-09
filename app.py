@@ -1,8 +1,10 @@
 # app.py
-# LeaseLens - Streamlit web app (step D8: Negotiator screen added).
+# LeaseLens - Streamlit web app (step D10: Move-in Vault screen added).
 # Run with:  streamlit run app.py
 
+import hashlib
 import html
+import uuid
 
 import streamlit as st
 
@@ -11,6 +13,14 @@ from core.sample_data import get_sample_bundle, get_sample_rules
 from core.schema import Deduction
 from core.simulator import DISCLAIMER as SIM_DISCLAIMER
 from core.simulator import simulate
+from core.vault import (
+    agreement_checklist,
+    base_checklist,
+    delete_all,
+    export_report,
+    list_entries,
+    save_entry,
+)
 
 # ---------------------------------------------------------------
 # Page setup (must be the first Streamlit call)
@@ -25,6 +35,11 @@ DISCLAIMER = (
 MISSING_NOTE = (
     "A missing detail is not automatically a legal violation. "
     "These are things you may want to ask to be written down."
+)
+
+VAULT_CONSENT = (
+    "I agree to store my notes and photos on this computer only, "
+    "in the vault_data folder. Nothing is uploaded anywhere."
 )
 
 # Colours and words used on the screens
@@ -678,6 +693,216 @@ def show_negotiator_tab() -> None:
 
 
 # ---------------------------------------------------------------
+# Move-in Vault screen
+# ---------------------------------------------------------------
+def item_key(area: str, item: str) -> str:
+    """A short, stable id for one checklist item (used in widget keys)."""
+    return hashlib.md5((area + "|" + item).encode("utf-8")).hexdigest()[:10]
+
+
+def group_by_area(items):
+    """Group checklist items by area, keeping the original order."""
+    groups = {}
+    for entry in items:
+        groups.setdefault(entry["area"], []).append(entry["item"])
+    return groups
+
+
+def show_checklist_item(session_id: str, area: str, item: str) -> None:
+    """One checklist item: a note box, a photo box and a Save button."""
+    key = item_key(area, item)
+    gens = st.session_state.setdefault("vault_gen", {})
+    counts = st.session_state.setdefault("vault_saved", {})
+    gen = gens.get(key, 0)
+    suffix = session_id + "_" + key + "_" + str(gen)
+
+    with st.container(border=True):
+        st.markdown("**" + item + "**")
+        note = st.text_input("Note (optional)", key="vnote_" + suffix)
+        photo = st.file_uploader(
+            "Photo (optional)",
+            type=["png", "jpg", "jpeg"],
+            key="vphoto_" + suffix,
+        )
+        if st.button("Save", key="vsave_" + suffix):
+            if not note.strip() and photo is None:
+                st.warning("Please add a note or a photo first.")
+            else:
+                photo_bytes = None
+                if photo is not None:
+                    photo_bytes = photo.getvalue()
+                try:
+                    save_entry(session_id, area, item, note.strip(), photo_bytes)
+                except Exception as error:
+                    st.error("Sorry, this could not be saved: " + str(error))
+                else:
+                    counts[key] = counts.get(key, 0) + 1
+                    gens[key] = gen + 1
+                    st.rerun()
+        if counts.get(key, 0) > 0:
+            st.success("✅ Saved (" + str(counts[key]) + ")")
+
+
+def show_saved_entries(session_id: str) -> None:
+    """List everything saved so far, with small photos."""
+    entries = list_entries(session_id)
+    title = "What I have saved so far (" + str(len(entries)) + ")"
+    with st.expander(title):
+        if not entries:
+            st.write("Nothing saved yet.")
+        for entry in entries:
+            st.markdown("**" + entry["saved_at"] + " - " + entry["area"] + "**")
+            st.write(entry["item"])
+            if entry["note"]:
+                st.write("Note: " + entry["note"])
+            if entry["photo_path"]:
+                st.image(entry["photo_path"], width=200)
+            st.divider()
+
+
+def show_terms_form(session_id: str):
+    """The agreed-terms form. Returns a dictionary for the report."""
+    st.markdown("### Agreed details for the report")
+
+    default_rent = 0.0
+    default_deposit = 0.0
+    bundle = st.session_state.get("bundle")
+    if bundle is not None:
+        terms = bundle.extract.key_terms
+        if terms.monthly_rent:
+            default_rent = float(terms.monthly_rent)
+        if terms.security_deposit:
+            default_deposit = float(terms.security_deposit)
+
+    col1, col2 = st.columns(2)
+    rent = col1.number_input(
+        "Monthly rent (Rs.)",
+        min_value=0.0,
+        value=default_rent,
+        step=500.0,
+        key="vterm_rent_" + session_id + "_" + str(int(default_rent)),
+    )
+    deposit = col2.number_input(
+        "Security deposit (Rs.)",
+        min_value=0.0,
+        value=default_deposit,
+        step=1000.0,
+        key="vterm_deposit_" + session_id + "_" + str(int(default_deposit)),
+    )
+    maintenance = st.text_input(
+        "Who pays for maintenance and repairs?",
+        key="vterm_maint_" + session_id,
+    )
+    col3, col4, col5 = st.columns(3)
+    keys_given = col3.text_input(
+        "Keys handed over", key="vterm_keys_" + session_id
+    )
+    electricity = col4.text_input(
+        "Electricity meter reading", key="vterm_elec_" + session_id
+    )
+    water = col5.text_input(
+        "Water meter reading", key="vterm_water_" + session_id
+    )
+
+    return {
+        "monthly_rent": rent if rent > 0 else None,
+        "security_deposit": deposit if deposit > 0 else None,
+        "maintenance_responsibility": maintenance.strip() or None,
+        "keys_handed_over": keys_given.strip() or None,
+        "electricity_meter": electricity.strip() or None,
+        "water_meter": water.strip() or None,
+    }
+
+
+def show_vault_buttons(session_id: str, agreed_terms: dict) -> None:
+    """The report button, the download button and the delete button."""
+    st.markdown("### Your move-in condition report")
+    st.write(
+        "Click 'Create my report' after you have saved your entries. "
+        "If you save more later, create it again."
+    )
+
+    if st.button("Create my report", type="primary", key="vault_make_pdf"):
+        try:
+            st.session_state["vault_pdf"] = export_report(
+                session_id, agreed_terms
+            )
+        except Exception as error:
+            st.error("Sorry, the report could not be made: " + str(error))
+
+    if "vault_pdf" in st.session_state:
+        st.download_button(
+            "Download move-in condition report (PDF)",
+            data=st.session_state["vault_pdf"],
+            file_name="move_in_condition_report.pdf",
+            mime="application/pdf",
+            key="vault_download_pdf",
+        )
+
+    st.markdown("### Delete my data")
+    if st.button("Delete all my vault data", key="vault_delete"):
+        st.session_state["vault_confirm_delete"] = True
+
+    if st.session_state.get("vault_confirm_delete"):
+        st.warning(
+            "This will permanently delete every note and photo you saved "
+            "in this vault. This cannot be undone."
+        )
+        col_yes, col_no = st.columns(2)
+        if col_yes.button("Yes, delete everything", key="vault_delete_yes"):
+            try:
+                delete_all(session_id)
+            except Exception as error:
+                st.error("Sorry, the data could not be deleted: " + str(error))
+            else:
+                for name in ("vault_saved", "vault_gen", "vault_pdf",
+                             "vault_confirm_delete", "vault_session"):
+                    st.session_state.pop(name, None)
+                st.rerun()
+        if col_no.button("No, keep my data", key="vault_delete_no"):
+            st.session_state["vault_confirm_delete"] = False
+            st.rerun()
+
+
+def show_vault_tab() -> None:
+    """The whole Move-in Vault tab."""
+    st.subheader("Move-in Vault")
+    st.write(
+        "Record the condition of your new home on the day you move in. "
+        "Notes and photos can help if there is a disagreement about "
+        "your deposit later."
+    )
+
+    # Nothing else is shown until the person agrees.
+    agreed = st.checkbox(VAULT_CONSENT, key="vault_consent")
+    if not agreed:
+        return
+
+    if "vault_session" not in st.session_state:
+        st.session_state["vault_session"] = uuid.uuid4().hex[:12]
+    session_id = st.session_state["vault_session"]
+
+    # Checklist = agreement-specific items first, then the standard ones.
+    items = []
+    bundle = st.session_state.get("bundle")
+    if bundle is not None:
+        items = items + agreement_checklist(bundle)
+    items = items + base_checklist()
+
+    st.markdown("### Move-in checklist")
+    groups = group_by_area(items)
+    for area, rows in groups.items():
+        is_first = area == "From this agreement"
+        with st.expander(area, expanded=is_first):
+            for item in rows:
+                show_checklist_item(session_id, area, item)
+
+    show_saved_entries(session_id)
+    agreed_terms = show_terms_form(session_id)
+    show_vault_buttons(session_id, agreed_terms)
+
+
+# ---------------------------------------------------------------
 # Sidebar
 # ---------------------------------------------------------------
 with st.sidebar:
@@ -759,8 +984,7 @@ with tab_neg:
 
 # ----- Tab 6: Move-in Vault -----
 with tab_vault:
-    st.subheader("Move-in Vault")
-    st.write("Coming soon")
+    show_vault_tab()
 
 # ---------------------------------------------------------------
 # Footer
