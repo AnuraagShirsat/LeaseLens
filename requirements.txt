@@ -1,0 +1,8 @@
+streamlit
+ollama
+pydantic
+pytest
+pymupdf
+pillow
+fpdf2
+python-dateutil
