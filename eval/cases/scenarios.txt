@@ -1,0 +1,33 @@
+LEASELENS MOCK AGREEMENT SCENARIOS
+All people, addresses and amounts are fictional.
+Every agreement is an 11-month residential flat agreement in Bengaluru.
+Landlord: Mr. Ravi Example. Tenant: Ms. Anita Sample.
+Monthly rent in every case: Rs 20,000.
+
+CASE 1: Vague deduction, no return time
+- Deposit: Rs 60,000, stated once and consistently.
+- Planted issue 1 (deductions, in the deposit clause): the landlord may deduct "painting and repair charges" from the deposit, with no amount, no list and no proof needed.
+- Planted issue 2 (missing): the agreement never says when the deposit will be returned.
+- Everything else is balanced.
+
+CASE 2: Two different deposit amounts (a conflict)
+- Planted issue 1 (conflict): the summary table at the top says the deposit is Rs 60,000, but a later clause says Rs 80,000.
+- No other planted issues. Everything else is balanced and clear.
+- The deposit return time IS stated, so nothing is "missing".
+
+CASE 3: Long lock-in, long notice, unclear maintenance (make this one a slightly tilted phone photo)
+- Planted issue 1 (lock_in): a lock-in period of 8 months out of the 11-month term.
+- Planted issue 2 (termination_notice): a notice period of 90 days.
+- Planted issue 3 (maintenance_repairs): the maintenance clause says repairs "shall be taken care of as required" without saying who pays.
+- Everything else is balanced.
+
+CASE 4: Mostly balanced (checks that we do not flag everything)
+- Planted issue 1 (missing): the agreement says "see Annexure A (inventory of items)" but no annexure is attached.
+- Planted issue 2 (entry_inspection, small): the landlord may enter "with reasonable notice" without saying how much notice.
+- Everything else is balanced and clear, with deposit amount, return time, lock-in and notice all stated sensibly.
+
+NOTES FOR WHEN WE WRITE THE FILES
+- Clause numbers will be added when each agreement is written.
+- Each case folder gets: page images + expected.txt
+- expected.txt lines look like:   topic │ short description
+  (the topic is one of the allowed topics, or the word "conflict" or "missing")
