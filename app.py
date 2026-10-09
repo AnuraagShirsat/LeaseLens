@@ -1,5 +1,5 @@
 # app.py
-# LeaseLens - Streamlit web app (step D3: Findings screen added).
+# LeaseLens - Streamlit web app (step D4: Gaps screen added).
 # Run with:  streamlit run app.py
 
 import html
@@ -18,7 +18,12 @@ DISCLAIMER = (
     "It is not legal advice. For legal advice, consult a qualified lawyer."
 )
 
-# Colours and words used on the Findings screen
+MISSING_NOTE = (
+    "A missing detail is not automatically a legal violation. "
+    "These are things you may want to ask to be written down."
+)
+
+# Colours and words used on the screens
 RISK_COLOURS = {"high": "#d32f2f", "medium": "#ef6c00", "low": "#2e7d32"}
 RISK_ORDER = {"high": 0, "medium": 1, "low": 2}
 
@@ -124,7 +129,7 @@ def run_real_analysis(files):
         page_images = load_pages(files)
         bundle = run_analysis(page_images, progress_cb)
     except Exception as error:
-        st.error(f"Sorry, the analysis did not work: {error}")
+        st.error("Sorry, the analysis did not work: " + str(error))
         return None
 
     progress_bar.progress(1.0)
@@ -133,17 +138,27 @@ def run_real_analysis(files):
 
 
 # ---------------------------------------------------------------
-# Helpers for the Findings screen
+# Small HTML helpers (badges and quote block)
 # ---------------------------------------------------------------
-def risk_badge_html(risk: str) -> str:
-    """A small coloured label such as HIGH RISK."""
-    colour = RISK_COLOURS.get(risk, "#555555")
+def badge_html(colour: str, label: str) -> str:
+    """A small coloured label."""
     style = (
         "background:" + colour + ";color:white;padding:2px 10px;"
         "border-radius:12px;font-size:0.8rem;font-weight:600;"
     )
-    label = html.escape(risk.upper()) + " RISK"
-    return '<span style="' + style + '">' + label + "</span>"
+    return '<span style="' + style + '">' + html.escape(label) + "</span>"
+
+
+def risk_badge_html(risk: str) -> str:
+    """A badge such as HIGH RISK."""
+    colour = RISK_COLOURS.get(risk, "#555555")
+    return badge_html(colour, risk.upper() + " RISK")
+
+
+def severity_badge_html(severity: str) -> str:
+    """A badge such as HIGH SEVERITY."""
+    colour = RISK_COLOURS.get(severity, "#555555")
+    return badge_html(colour, severity.upper() + " SEVERITY")
 
 
 def quote_html(text: str) -> str:
@@ -155,6 +170,9 @@ def quote_html(text: str) -> str:
     return '<div style="' + style + '">' + html.escape(text) + "</div>"
 
 
+# ---------------------------------------------------------------
+# Findings screen
+# ---------------------------------------------------------------
 def show_evidence(finding) -> None:
     """Show the Evidence box for one finding."""
     with st.container(border=True):
@@ -172,9 +190,8 @@ def show_evidence(finding) -> None:
                 if rule.section:
                     st.write("Section: " + rule.section)
                 if rule.source_url and rule.source_url.startswith("http"):
-                    st.markdown(
-                        "Source: [" + rule.source_name + "](" + rule.source_url + ")"
-                    )
+                    link = "[" + rule.source_name + "](" + rule.source_url + ")"
+                    st.markdown("Source: " + link)
                 else:
                     st.write("Source: " + rule.source_name)
                 st.write("Date checked: " + rule.date_checked)
@@ -274,6 +291,59 @@ def show_findings_tab() -> None:
 
 
 # ---------------------------------------------------------------
+# Gaps screen
+# ---------------------------------------------------------------
+def show_gap_card(gap) -> None:
+    """Draw one gap (conflict or missing detail) as a bordered card."""
+    with st.container(border=True):
+        heading = (
+            severity_badge_html(gap.severity)
+            + " &nbsp; <b>"
+            + html.escape(gap.title)
+            + "</b>"
+        )
+        st.markdown(heading, unsafe_allow_html=True)
+        st.write(gap.description)
+        if gap.related_clause_ids:
+            clauses_text = ", ".join(gap.related_clause_ids)
+        else:
+            clauses_text = "none"
+        st.write("Related clauses: " + clauses_text)
+
+
+def show_gaps_tab() -> None:
+    """The whole Gaps tab: conflicts first, then missing details."""
+    st.subheader("Gaps")
+
+    if "bundle" not in st.session_state:
+        st.info("Upload an agreement first.")
+        return
+
+    gaps = st.session_state["bundle"].gaps
+    conflicts = [g for g in gaps if g.kind == "conflict"]
+    missing = [g for g in gaps if g.kind == "missing"]
+    conflicts.sort(key=lambda g: RISK_ORDER.get(g.severity, 3))
+    missing.sort(key=lambda g: RISK_ORDER.get(g.severity, 3))
+
+    # Section 1: conflicts
+    st.markdown("### Details that disagree (conflicts)")
+    if conflicts:
+        for gap in conflicts:
+            show_gap_card(gap)
+    else:
+        st.success("Good news: no conflicting details were found.")
+
+    # Section 2: missing details
+    st.markdown("### Details that are missing")
+    st.caption(MISSING_NOTE)
+    if missing:
+        for gap in missing:
+            show_gap_card(gap)
+    else:
+        st.success("Good news: no missing details were found.")
+
+
+# ---------------------------------------------------------------
 # Sidebar
 # ---------------------------------------------------------------
 with st.sidebar:
@@ -341,8 +411,7 @@ with tab_findings:
 
 # ----- Tab 3: Gaps -----
 with tab_gaps:
-    st.subheader("Gaps")
-    st.write("Coming soon")
+    show_gaps_tab()
 
 # ----- Tab 4: Deposit Simulator -----
 with tab_sim:
