@@ -20,6 +20,15 @@ import config  # expects MODEL_NAME at module level
 
 T = TypeVar("T", bound=BaseModel)
 
+# Context window for every call. Lease documents (even a few pages) easily
+# exceed 4096 tokens once you add the schema and the JSON output, which makes
+# Ollama silently truncate and the model loop. 16k is a safe default.
+NUM_CTX = 16384
+
+# Hard cap on generated tokens per call. Prevents a looping model from
+# generating for many minutes.
+NUM_PREDICT = 4096
+
 
 class GemmaError(Exception):
     """User-friendly error raised for any Gemma/Ollama failure."""
@@ -92,7 +101,11 @@ def _chat(messages: list[dict], *, format: Any = None, temperature: float) -> st
             model=config.MODEL_NAME,
             messages=messages,
             format=format,
-            options={"temperature": temperature},
+            options={
+                "temperature": temperature,
+                "num_ctx": NUM_CTX,
+                "num_predict": NUM_PREDICT,
+            },
         )
     except Exception as e:
         msg = str(e).lower()
