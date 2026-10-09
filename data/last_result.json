@@ -1,0 +1,302 @@
+{
+  "extract": {
+    "clauses": [
+      {
+        "clause_id": "C1",
+        "heading": null,
+        "text": "PARTIES AND USE\nThe Landlord lets the Property to the Tenant for residential use only. The Tenant will live in the Property with immediate family members only.",
+        "page": 1,
+        "read_confidence": "high",
+        "read_note": null
+      },
+      {
+        "clause_id": "C2",
+        "heading": null,
+        "text": "TERM\nThis agreement runs for 11 months, from 1 November 2026 to 30 September 2027.",
+        "page": 1,
+        "read_confidence": "high",
+        "read_note": null
+      },
+      {
+        "clause_id": "C3",
+        "heading": null,
+        "text": "RENT\nThe Tenant will pay rent of Rs 20,000 per month, on or before the 5th day of each month, by bank transfer to the account of the Landlord shares in writing. The Landlord will give a written receipt for each payment.",
+        "page": 1,
+        "read_confidence": "high",
+        "read_note": null
+      },
+      {
+        "clause_id": "C4",
+        "heading": null,
+        "text": "SECURITY DEPOSIT\nBefore taking possession, the Tenant has paid an interest-free security deposit of Rs 60,000. The Landlord acknowledges receipt of this amount.",
+        "page": 1,
+        "read_confidence": "high",
+        "read_note": null
+      },
+      {
+        "clause_id": "C5",
+        "heading": null,
+        "text": "DEDUCTIONS FROM THE DEPOSIT",
+        "page": 2,
+        "read_confidence": "high",
+        "read_note": null
+      },
+      {
+        "clause_id": "C6",
+        "heading": null,
+        "text": "LOCK-IN\nNeither party may end this agreement during the first 3 months from 1 November 2026.",
+        "page": 2,
+        "read_confidence": "high",
+        "read_note": null
+      },
+      {
+        "clause_id": "C7",
+        "heading": null,
+        "text": "NOTICE\nAfter the lock-in period, either party may end this agreement by giving the other 30 days’ written notice.",
+        "page": 2,
+        "read_confidence": "high",
+        "read_note": null
+      },
+      {
+        "clause_id": "C8",
+        "heading": null,
+        "text": "MAINTENANCE, REPAIRS AND UTILITIES\nThe Landlord is responsible for structural repairs and for plumbing and electrical faults that are not caused by the Tenant. The Tenant is responsible for day-to-day upkeep and for repairing damage caused by the Tenant. The Tenant will pay the monthly maintenance charge of the apartment association, and electricity and water charges according to the meters.",
+        "page": 2,
+        "read_confidence": "high",
+        "read_note": null
+      },
+      {
+        "clause_id": "C9",
+        "heading": null,
+        "text": "LANDLORD’S ENTRY\nThe Landlord may enter the Property to inspect it after giving the Tenant at least 24 hours’ notice, between 10 am and 6 pm. In an emergency, the Landlord may enter without notice.",
+        "page": 2,
+        "read_confidence": "high",
+        "read_note": null
+      },
+      {
+        "clause_id": "C10",
+        "heading": null,
+        "text": "SUBLETTING\nThe Tenant will not sublet the Property or transfer this agreement to anyone else without the Landlord’s written consent.",
+        "page": 2,
+        "read_confidence": "high",
+        "read_note": null
+      },
+      {
+        "clause_id": "C11",
+        "heading": null,
+        "text": "RENT ESCALATION\nThe rent stays the same during the 11-month term. Any change in rent for a renewed term must be agreed in writing by both parties.",
+        "page": 2,
+        "read_confidence": "high",
+        "read_note": null
+      },
+      {
+        "clause_id": "C12",
+        "heading": null,
+        "text": "TERMINATION [UNREADABLE]",
+        "page": 3,
+        "read_confidence": "low",
+        "read_note": "Unreadable section.  Unable to extract details."
+      }
+    ],
+    "key_terms": {
+      "monthly_rent": 20000,
+      "security_deposit": 60000,
+      "agreement_term_months": 11,
+      "lock_in_months": 3,
+      "notice_period_days": 30,
+      "rent_escalation_percent": null,
+      "start_date": "2026-11-01",
+      "landlord_name": "Mr. Ravi Example",
+      "tenant_name": "Ms. Anita Sample",
+      "deposit_mentions": [
+        60000
+      ]
+    },
+    "full_text": "<<<PAGE 1>>>\nRESIDENTIAL RENTAL AGREEMENT\n(Fictional sample for software testing only. No real people or places.)\n\nThis agreement is made on 1 November 2026 at Bengaluru 560000\nbetween:\n\nLandlord: Mr. Ravi Example, of 12 Sample Road, Example Layout, Bengaluru 560000 (the \"Landlord\").\nTenant: Ms. Anita Sample (the \"Tenant\").\n\nProperty: Flat 101, Imaginary Apartments, 5th Cross, Example Layout, Bengaluru 560000\n(the \"Property\").\n\nThe parties agree as follows:\n\n1. PARTIES AND USE\nThe Landlord lets the Property to the Tenant for residential use only. The Tenant will live in\nthe Property with immediate family members only.\n\n2. TERM\nThis agreement runs for 11 months, from 1 November 2026 to 30 September 2027.\n\n3. RENT\nThe Tenant will pay rent of Rs 20,000 per month, on or before the 5th day of each month, by\nbank transfer to the account of the Landlord shares in writing. The Landlord will give a written\nreceipt for each payment.\n\n4. SECURITY DEPOSIT\nBefore taking possession, the Tenant has paid an interest-free security deposit of Rs 60,000.\nThe Landlord acknowledges receipt of this amount.\n\n5. DEDUCTIONS FROM THE DEPOSIT\n\n<<<PAGE 2>>>\n6. LOCK-IN\nNeither party may end this agreement during the first 3 months from 1 November 2026.\n\n7. NOTICE\nAfter the lock-in period, either party may end this agreement by giving the other 30 days’ written notice.\n\n8. MAINTENANCE, REPAIRS AND UTILITIES\nThe Landlord is responsible for structural repairs and for plumbing and electrical faults that are not caused by the Tenant. The Tenant is responsible for day-to-day upkeep and for repairing damage caused by the Tenant. The Tenant will pay the monthly maintenance charge of the apartment association, and electricity and water charges according to the meters.\n\n9. LANDLORD’S ENTRY\nThe Landlord may enter the Property to inspect it after giving the Tenant at least 24 hours’ notice, between 10 am and 6 pm. In an emergency, the Landlord may enter without notice.\n\n10. SUBLETTING\nThe Tenant will not sublet the Property or transfer this agreement to anyone else without the Landlord’s written consent.\n\n11. RENT ESCALATION\nThe rent stays the same during the 11-month term. Any change in rent for a renewed term must be agreed in writing by both parties.\n\n12. TERMINATION [UNREADABLE]\n\n<<<PAGE 3>>>\nEither party may end this agreement early if the other party seriously breaks it and does not fix the breach within 15 days of written notice. When the agreement ends, the Tenant will vacate the Property and hand over all keys to the Landlord.\n\nSigned on 1 November 2026.\n\n[SIGNATURE: Mr. Ravi Example (Landlord)] [SIGNATURE: Ms. Anita Sample (Tenant)]",
+    "page_count": 3
+  },
+  "findings": [
+    {
+      "clause_id": "C1",
+      "quoted_text": "PARTIES AND USE\nThe Landlord lets the Property to the Tenant for residential use only. The Tenant will live in the Property with immediate family members only.",
+      "topic": "other",
+      "risk": "medium",
+      "risk_explanation": "This clause restricts the tenant to living in the property with only immediate family members. If the tenant brings in a partner or other unrelated individuals, the landlord may have grounds to take action, potentially leading to a breach of the lease agreement. The exact consequences would depend on the specific terms of the full lease and local laws.",
+      "why_it_matters": "This clause defines who is allowed to live in the property. It's important to understand this to avoid any issues with the landlord.",
+      "evidence_status": "no_verified_rule_found",
+      "rule_ids": [],
+      "applicability_note": null,
+      "confidence": "high",
+      "suggested_question": "Could you clarify what is considered ‘immediate family’ for the purposes of this clause?"
+    },
+    {
+      "clause_id": "C2",
+      "quoted_text": "TERM\nThis agreement runs for 11 months, from 1 November 2026 to 30 September 2027.",
+      "topic": "renewal",
+      "risk": "medium",
+      "risk_explanation": "This clause simply states the initial term of the lease. It doesn't cover renewal options, rent changes, or notice periods. This lack of detail could lead to uncertainty about the future of the tenancy.",
+      "why_it_matters": "The agreement runs for 11 months. At the end of this period, the tenant will need to discuss renewal with the landlord. Without further information, it's unclear whether the tenant will be offered a new lease, what the new rent will be, or how much notice the tenant needs to give to end the tenancy.",
+      "evidence_status": "no_verified_rule_found",
+      "rule_ids": [],
+      "applicability_note": null,
+      "confidence": "low",
+      "suggested_question": "Could you please clarify the process for renewing the lease, including the timeframe for giving notice and whether the rent is subject to change upon renewal?"
+    },
+    {
+      "clause_id": "C3",
+      "quoted_text": "RENT\nThe Tenant will pay rent of Rs 20,000 per month, on or before the 5th day of each month, by bank transfer to the account of the Landlord shares in writing. The Landlord will give a written receipt for each payment.",
+      "topic": "rent_escalation",
+      "risk": "medium",
+      "risk_explanation": "This clause outlines the initial rent payment of Rs 20,000 per month. However, it doesn't specify any rules for future rent increases. While the provided key terms indicate a `rent_escalation_percent` of null, this clause doesn't detail how or when rent might be increased. This lack of detail creates uncertainty about future payments. The tenant could potentially see their rent increase significantly without prior notice, although the Act (KA-009) does provide some guidance on rent increases, but this clause doesn't explicitly reference it.",
+      "why_it_matters": "The clause establishes the initial rent, but the absence of a rent escalation clause means the tenant is vulnerable to unexpected rent increases in the future. The Act (KA-009) *may* apply if the landlord increases rent beyond what's allowed, but this clause doesn't guarantee that.",
+      "evidence_status": "no_verified_rule_found",
+      "rule_ids": [],
+      "applicability_note": null,
+      "confidence": "medium",
+      "suggested_question": "Could you please clarify whether there are any provisions for rent escalation beyond the initial amount of Rs 20,000 per month, and if so, what the criteria for those increases would be?"
+    },
+    {
+      "clause_id": "C4",
+      "quoted_text": "SECURITY DEPOSIT\nBefore taking possession, the Tenant has paid an interest-free security deposit of Rs 60,000. The Landlord acknowledges receipt of this amount.",
+      "topic": "deposit",
+      "risk": "medium",
+      "risk_explanation": "The clause states a security deposit of Rs 60,000 was paid. The agreement doesn't specify when the deposit will be returned, or what deductions the landlord may make. This could lead to uncertainty about the return of the deposit at the end of the tenancy.",
+      "why_it_matters": "The tenant could lose this Rs 60,000 if the landlord makes deductions without proper justification. It's important to understand what expenses the landlord can deduct (e.g., damage beyond normal wear and tear) and the process for disputing any deductions.",
+      "evidence_status": "no_verified_rule_found",
+      "rule_ids": [],
+      "applicability_note": null,
+      "confidence": "low",
+      "suggested_question": "Could you please clarify the timeframe for receiving the security deposit back, and what types of expenses the landlord is authorized to deduct?"
+    },
+    {
+      "clause_id": "C5",
+      "quoted_text": "DEDUCTIONS FROM THE DEPOSIT",
+      "topic": "deductions",
+      "risk": "medium",
+      "risk_explanation": "This clause deals with deductions from the security deposit. While it doesn't specify exactly *what* can be deducted, it does state that the landlord (Mr. Ravi Example) will handle this.  The agreement doesn't detail the return time for the deposit or the process for claiming deductions, which could lead to some uncertainty. It’s important to understand what is considered a ‘deduction’ and the evidence required.",
+      "why_it_matters": "The security deposit is held by the landlord and returned to you at the end of the tenancy. The clause outlines that the landlord *may* make deductions from this deposit. Without further clarification, you could be liable for costs that you believe are unreasonable or that weren't properly documented. It’s crucial to understand the conditions under which deductions are permitted.",
+      "evidence_status": "no_verified_rule_found",
+      "rule_ids": [],
+      "applicability_note": null,
+      "confidence": "low",
+      "suggested_question": "Could you please clarify what types of damage would be considered a deduction from the security deposit, and what proof the landlord would require to justify a deduction?"
+    },
+    {
+      "clause_id": "C6",
+      "quoted_text": "LOCK-IN\nNeither party may end this agreement during the first 3 months from 1 November 2026.",
+      "topic": "lock_in",
+      "risk": "medium",
+      "risk_explanation": "This clause states that neither the landlord nor the tenant can end the agreement for the first 3 months, starting November 1st, 2026. This means if you need to move before that time, you may be obligated to pay a penalty, although the agreement doesn't specify the amount. It's a fairly standard clause, but it’s important to understand the implications.",
+      "why_it_matters": "If you need to leave before November 1st, 2026, you could be responsible for paying rent for those 3 months. The agreement doesn't detail the cost of early termination.",
+      "evidence_status": "no_verified_rule_found",
+      "rule_ids": [],
+      "applicability_note": null,
+      "confidence": "high",
+      "suggested_question": "Could you please clarify what the process would be if I needed to terminate the agreement before November 1st, 2026?"
+    },
+    {
+      "clause_id": "C7",
+      "quoted_text": "NOTICE\nAfter the lock-in period, either party may end this agreement by giving the other 30 days’ written notice.",
+      "topic": "termination_notice",
+      "risk": "medium",
+      "risk_explanation": "This clause allows either you or the landlord to end the lease after the initial 'lock-in' period with 30 days’ written notice. This isn’t particularly unusual, but it means you could be required to move out if the landlord decides to do so. The 30-day notice period is relatively short, which could be inconvenient. It’s important to understand the circumstances under which the landlord might give this notice.",
+      "why_it_matters": "If the landlord provides you with 30 days’ notice to vacate, you would need to find a new place to live within that timeframe.  This could involve moving costs, potential disruption to your life, and the risk of not finding a suitable replacement property immediately.",
+      "evidence_status": "no_verified_rule_found",
+      "rule_ids": [],
+      "applicability_note": null,
+      "confidence": "high",
+      "suggested_question": "Could you please clarify what circumstances might lead the landlord to give a 30-day notice to end the agreement?"
+    },
+    {
+      "clause_id": "C8",
+      "quoted_text": "MAINTENANCE, REPAIRS AND UTILITIES\nThe Landlord is responsible for structural repairs and for plumbing and electrical faults that are not caused by the Tenant. The Tenant is responsible for day-to-day upkeep and for repairing damage caused by the Tenant. The Tenant will pay the monthly maintenance charge of the apartment association, and electricity and water charges according to the meters.",
+      "topic": "maintenance_repairs",
+      "risk": "medium",
+      "risk_explanation": "This clause outlines the responsibilities for maintenance and repairs between the landlord and tenant. The landlord is responsible for major structural issues and plumbing/electrical problems not caused by the tenant. The tenant is responsible for day-to-day upkeep and repairing damage they cause. The tenant also pays for apartment association fees, electricity, and water. This could lead to disputes if the tenant and landlord disagree on what constitutes 'day-to-day upkeep' or who is responsible for a specific issue. It’s important to clarify what is considered ‘normal wear and tear’ to avoid unexpected charges.",
+      "why_it_matters": "The tenant could be liable for unexpected repair costs if the definition of ‘damage caused by the tenant’ is unclear. They also have ongoing financial obligations for utilities and association fees. The clause doesn’t fully address the process for reporting repairs, which could lead to delays and frustration.",
+      "evidence_status": "verified_rule",
+      "rule_ids": [
+        "KA-003"
+      ],
+      "applicability_note": null,
+      "confidence": "high",
+      "suggested_question": "Could you please clarify what is considered ‘normal wear and tear’ in this agreement, and what the process is for reporting maintenance issues?"
+    },
+    {
+      "clause_id": "C9",
+      "quoted_text": "LANDLORD’S ENTRY\nThe Landlord may enter the Property to inspect it after giving the Tenant at least 24 hours’ notice, between 10 am and 6 pm. In an emergency, the Landlord may enter without notice.",
+      "topic": "entry_inspection",
+      "risk": "medium",
+      "risk_explanation": "This clause allows the landlord to enter the property with 24 hours' notice, which is standard, but it also includes a clause for emergencies where entry can occur without notice. While not inherently risky, the lack of detail about what constitutes an 'emergency' could lead to disputes. The tenant could be inconvenienced by unexpected visits.",
+      "why_it_matters": "The landlord may enter the property to inspect. The tenant must allow access, but the clause doesn't specify what the landlord is looking for or what the tenant can do if they disagree with the inspection. This could lead to misunderstandings or disputes about the condition of the property.",
+      "evidence_status": "no_verified_rule_found",
+      "rule_ids": [],
+      "applicability_note": null,
+      "confidence": "high",
+      "suggested_question": "Could you please clarify what types of issues the landlord typically uses this entry clause for, such as routine maintenance or more serious repairs?"
+    },
+    {
+      "clause_id": "C10",
+      "quoted_text": "SUBLETTING\nThe Tenant will not sublet the Property or transfer this agreement to anyone else without the Landlord’s written consent.",
+      "topic": "subletting",
+      "risk": "medium",
+      "risk_explanation": "This clause states that Ms. Sample cannot sublet the property or transfer the tenancy agreement to someone else without Mr. Ravi Example’s written permission. If she does, she could be in breach of the lease agreement. The exact consequences of a breach aren't detailed here, but it could lead to eviction.",
+      "why_it_matters": "Subletting without consent is a serious breach of the lease. It gives the landlord the right to take action, potentially including legal proceedings to regain possession of the property.",
+      "evidence_status": "no_verified_rule_found",
+      "rule_ids": [],
+      "applicability_note": null,
+      "confidence": "high",
+      "suggested_question": "Mr. Example, could you please clarify the process for obtaining written consent to sublet, including the timeframe you typically require for a response?"
+    },
+    {
+      "clause_id": "C11",
+      "quoted_text": "RENT ESCALATION\nThe rent stays the same during the 11-month term. Any change in rent for a renewed term must be agreed in writing by both parties.",
+      "topic": "rent_escalation",
+      "risk": "medium",
+      "risk_explanation": "This clause states that the rent will remain the same for the initial 11-month term. However, when the lease is renewed, the rent could change, but only if both the landlord and tenant agree to it in writing. This means the tenant could face a higher rent payment if the landlord decides to increase it, and the tenant has no protection against this increase unless a written agreement is reached. The clause is somewhat unclear about the process for agreeing to a new rent amount.",
+      "why_it_matters": "The tenant needs to be aware that the rent could increase upon renewal. It's important to track the rent and be prepared to negotiate a new rate if desired.",
+      "evidence_status": "no_verified_rule_found",
+      "rule_ids": [],
+      "applicability_note": null,
+      "confidence": "high",
+      "suggested_question": "Could you please clarify what factors the landlord considers when determining a potential rent increase for a renewed term?"
+    },
+    {
+      "clause_id": "C12",
+      "quoted_text": "TERMINATION [UNREADABLE]",
+      "topic": "other",
+      "risk": "medium",
+      "risk_explanation": "The clause is currently unreadable, which is unfavourable. It's unclear what the termination section of the lease actually entails. The tenant should seek clarification to understand their rights and obligations regarding ending the lease.",
+      "why_it_matters": "Without knowing the content of this clause, the tenant cannot understand when they may be able to end the lease, or what conditions might apply to termination.",
+      "evidence_status": "no_verified_rule_found",
+      "rule_ids": [],
+      "applicability_note": null,
+      "confidence": "low",
+      "suggested_question": "Could you please provide the full text of the termination clause so I can fully understand my rights and obligations?"
+    }
+  ],
+  "gaps": [
+    {
+      "kind": "missing",
+      "title": "Rent escalation is not stated",
+      "description": "The agreement does not state whether or how the rent increases. A missing detail is not automatically a legal violation, but you may want to ask for it to be written down.",
+      "related_clause_ids": [],
+      "severity": "medium"
+    },
+    {
+      "kind": "missing",
+      "title": "Inventory or annexure of fittings is not mentioned",
+      "description": "The agreement does not refer to an inventory or annexure listing the fittings and items handed over. A missing detail is not automatically a legal violation, but you may want to ask for it to be written down.",
+      "related_clause_ids": [],
+      "severity": "medium"
+    },
+    {
+      "kind": "missing",
+      "title": "Registration or stamp duty is not mentioned",
+      "description": "The agreement does not mention registration or stamp duty. A missing detail is not automatically a legal violation, but you may want to ask for it to be written down.",
+      "related_clause_ids": [],
+      "severity": "medium"
+    }
+  ],
+  "created_at": "2026-10-09T10:34:22+00:00"
+}
