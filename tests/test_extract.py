@@ -105,6 +105,54 @@ def test_extract_from_text_prompt_includes_full_text():
 
 
 # --------------------------------------------------------------------------- #
+# Deposit-mention detection (regex, not model)
+# --------------------------------------------------------------------------- #
+
+def test_extract_from_text_overrides_deposit_mentions_with_regex():
+    # The model returns a bogus deposit_mentions; regex must replace it.
+    core = _core_payload(
+        [_clause_payload("C1")],
+        key_terms={
+            "monthly_rent": 50000,
+            "security_deposit": 60000,
+            "agreement_term_months": None,
+            "lock_in_months": None,
+            "notice_period_days": None,
+            "rent_escalation_percent": None,
+            "start_date": None,
+            "landlord_name": None,
+            "tenant_name": None,
+            "deposit_mentions": [999999],  # deliberately wrong
+        },
+    )
+    text = (
+        "Security deposit is Rs. 60,000 payable on signing.\n"
+        "Interest-free deposit of INR 60,000 refundable.\n"
+        "Rent is Rs. 50,000 per month."  # not a deposit line
+    )
+    with patch("core.extract.gemma.ask_json",
+               return_value=extract._AgreementCore.model_validate(core)):
+        result = extract.extract_agreement_from_text(text, page_count=1)
+
+    assert result.key_terms.deposit_mentions == [60000, 60000]
+
+
+def test_find_deposit_mentions_ignores_lines_without_word_deposit():
+    text = "Rent is Rs. 50,000.\nDeposit of ₹60,000 is due."
+    assert extract._find_deposit_mentions(text) == [60000]
+
+
+def test_find_deposit_mentions_handles_all_formats():
+    text = (
+        "Deposit Rs. 60,000\n"
+        "Deposit Rs 60000\n"
+        "Deposit INR 60,000\n"
+        "Deposit ₹60,000\n"
+    )
+    assert extract._find_deposit_mentions(text) == [60000, 60000, 60000, 60000]
+
+
+# --------------------------------------------------------------------------- #
 # Full pipeline
 # --------------------------------------------------------------------------- #
 
@@ -131,6 +179,35 @@ def test_extract_agreement_end_to_end():
     prompt = aj.call_args.args[0]
     assert "<<<PAGE 1>>>" in prompt
     assert "<<<PAGE 2>>>" in prompt
+
+
+def test_extract_agreement_calls_progress_cb_per_page():
+    page_texts = ["one", "two", "three"]
+    core = _core_payload([_clause_payload("C1")])
+
+    seen: list[tuple[float, str]] = []
+
+    with patch("core.extract.gemma.ask_text", side_effect=page_texts), \
+         patch("core.extract.gemma.ask_json",
+               return_value=extract._AgreementCore.model_validate(core)):
+        extract.extract_agreement(
+            [PNG, PNG, PNG],
+            progress_cb=lambda frac, msg: seen.append((frac, msg)),
+        )
+
+    assert [f for f, _ in seen] == [1 / 3, 2 / 3, 1.0]
+    assert seen[0][1] == "Transcribed page 1/3"
+    assert seen[-1][1] == "Transcribed page 3/3"
+
+
+def test_extract_agreement_progress_cb_is_optional():
+    core = _core_payload([_clause_payload("C1")])
+    with patch("core.extract.gemma.ask_text", return_value="text"), \
+         patch("core.extract.gemma.ask_json",
+               return_value=extract._AgreementCore.model_validate(core)):
+        # No progress_cb passed; should not raise.
+        result = extract.extract_agreement([PNG])
+    assert result.page_count == 1
 
 
 def test_extract_agreement_rejects_empty_input():
