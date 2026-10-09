@@ -42,7 +42,7 @@ GEMMA_MODEL: str = MODEL_NAME
 GEMMA_API_KEY: str | None = None
 
 # Ollama generation parameters.
-NUM_CTX: int = 8192         # context window (tokens). Drop to 4096 if OOM.
+NUM_CTX: int = 16384         # context window (tokens). Drop to 4096 if OOM.
 NUM_PREDICT: int = 2048     # max output tokens per response.
 NUM_GPU: int = -1           # -1 = let Ollama offload as many layers as fit.
 TEMPERATURE: float = 0.1    # low = more factual for legal text.
