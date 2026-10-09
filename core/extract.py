@@ -24,7 +24,7 @@ from typing import Callable, Optional, Sequence
 
 from pydantic import BaseModel
 
-from core import gemma
+import gemma
 from core.schema import AgreementExtract, Clause, KeyTerms
 
 

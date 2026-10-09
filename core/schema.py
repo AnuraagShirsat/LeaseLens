@@ -143,6 +143,17 @@ class Deduction(BaseModel):
     has_proof: bool
 
 
+class DeductionAssessment(BaseModel):
+    """Assessment of a proposed deposit deduction."""
+
+    deduction: Deduction
+    risk: Risk
+    reason: str
+    rule_ids: list[str] = Field(default_factory=list)
+    evidence_status: EvidenceStatus
+    suggested_response: str
+
+
 class NegotiationDrafts(BaseModel):
     """Three tones of negotiation message."""
 
