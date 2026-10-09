@@ -10,7 +10,7 @@
       "summary": "After this Act began, no person may let or take any premises on rent except through a written agreement. For tenancies that began before the Act without one, the landlord and tenant are to make a written agreement and deposit a copy with the prescribed authority; if they do not present it jointly, each files details separately.",
       "applies_when": "Check whether this provision applies to your situation",
       "topics": ["other"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     },
     {
       "rule_id": "KA-002",
@@ -22,7 +22,7 @@
       "summary": "This Act applies to areas listed in its First Schedule, mainly city corporation areas plus three kilometres around them, and city municipal council areas. It does not apply to some premises, including government premises, premises whose rent is above set limits, premises built or substantially renovated within fifteen years, and most non-residential premises. The government may change where it applies.",
       "applies_when": "Depends on the area, the rent level, the age of the building and how it is used. See Section 2(3) and the First Schedule.",
       "topics": ["other"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     },
     {
       "rule_id": "KA-003",
@@ -34,7 +34,7 @@
       "summary": "The tenant must keep the premises in good and tenantable repair for matters in Part B of Schedule V, make good damage caused by negligence, and return the premises in the same condition apart from normal wear and tear. If not, the landlord may apply to the Controller. The landlord may enter and inspect after notice.",
       "applies_when": "Check whether this provision applies to your situation",
       "topics": ["maintenance_repairs", "entry_inspection"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     },
     {
       "rule_id": "KA-004",
@@ -46,7 +46,7 @@
       "summary": "Unless a written contract says otherwise, the landlord must keep the premises in good and tenantable repair for matters in Part A of Schedule V, normal wear and tear excepted. If repairs needed to make the premises habitable or usable are not made within three months of written notice, the tenant may ask the Controller for permission to make them.",
       "applies_when": "Check whether this provision applies to your situation",
       "topics": ["maintenance_repairs"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     },
     {
       "rule_id": "KA-005",
@@ -58,7 +58,7 @@
       "summary": "A landlord may not, without just and sufficient cause, cut off or withhold an essential supply or service the tenant enjoys, such as water, electricity, lights in passages and on staircases, or sanitary services. A tenant may complain to the Controller, who may order the supply or service to be restored.",
       "applies_when": "Check whether this provision applies to your situation",
       "topics": ["utilities"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     },
     {
       "rule_id": "KA-006",
@@ -70,7 +70,7 @@
       "summary": "Besides rent, a tenant is liable to pay charges for listed or agreed amenities (not above fifteen per cent of the rent), maintenance charges at ten per cent of the rent, and a prorata share of property tax. The landlord may recover from the tenant the electricity, water or other authority charges that are ordinarily payable by the tenant.",
       "applies_when": "Check whether this provision applies to your situation",
       "topics": ["utilities", "maintenance_repairs"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     },    
     {
       "rule_id": "KA-007",
@@ -82,7 +82,7 @@
       "summary": "After the Act began, a tenant may not sub-let any part of the premises, or transfer or assign tenancy rights, without the landlord's previous written consent. A landlord may not claim or receive any premium, pugree or other payment for giving that consent.",
       "applies_when": "Check whether this provision applies to your situation",
       "topics": ["subletting"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     },    
     {
       "rule_id": "KA-008",
@@ -94,7 +94,7 @@
       "summary": "A landlord may get a Court order to recover possession only on the grounds listed in the Act. These include: arrears of rent and charges not paid within two months of a notice of demand; use of the premises for another purpose without written consent, after notice; and not vacating on a date agreed or informed in writing.",
       "applies_when": "Check whether this provision applies to your situation",
       "topics": ["eviction"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     },
     {
       "rule_id": "KA-009",
@@ -106,7 +106,7 @@
       "summary": "Rent payable is the rent agreed between landlord and tenant, enhanced as set by the Third Schedule, or the standard rent. The Third Schedule calculates yearly enhancement from a table, compounding yearly; for agreements dated from 1 January 1995, the rate shown is seventy-five per cent of annual wholesale price index inflation.",
       "applies_when": "Check whether this provision applies to your situation",
       "topics": ["rent_escalation"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     },
     {
       "rule_id": "KA-010",
@@ -118,7 +118,7 @@
       "summary": "A tenant must pay rent by the date fixed by contract, or otherwise by the fifteenth day of the following month; on default the tenant is liable to simple interest at twelve per cent a year. A tenant who pays is entitled to a written receipt. If a receipt is refused, the tenant may apply to the Controller.",
       "applies_when": "Check whether this provision applies to your situation",
       "topics": ["other"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     },
     {
       "rule_id": "KA-011",
@@ -130,7 +130,7 @@
       "summary": "Unless a contract, local law or usage says otherwise, a lease for any purpose other than agricultural or manufacturing is treated as month to month, ending on fifteen days' notice from either side. The period starts when the notice is received. A notice must be in writing, signed, and sent or delivered in the ways the section describes.",
       "applies_when": "Applies in the absence of a contract or local law or usage to the contrary. Check whether this provision applies to your situation",
       "topics": ["termination_notice"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     },
     {
       "rule_id": "KA-012",
@@ -142,7 +142,7 @@
       "summary": "A lease from year to year, for any term exceeding one year, or reserving a yearly rent can be made only by a registered instrument. Other leases may be made by a registered instrument or by oral agreement with delivery of possession. The State Government may, by notification, allow some leases to be made without registration.",
       "applies_when": "Depends on whether the lease is from year to year, runs for more than one year, or reserves a yearly rent. Check whether this provision applies to your situation",
       "topics": ["registration_stamp"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     },
     {
       "rule_id": "KA-013",
@@ -154,7 +154,7 @@
       "summary": "It is good practice for the agreement to state the deposit amount once, how it was paid and that a receipt was given. It is also good practice to state when the deposit will be returned, which deductions are allowed, and that any deduction comes with an itemised list and proof such as photos.",
       "applies_when": "General good practice. It is not a legal requirement.",
       "topics": ["deposit", "deductions"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     },
     {
       "rule_id": "KA-014",
@@ -166,7 +166,7 @@
       "summary": "It is good practice for the agreement to say clearly how long the lock-in period is, who it binds (tenant, landlord or both), and what happens if someone leaves early. You may want to ask whether a long lock-in or a large early-exit cost works for you.",
       "applies_when": "General good practice. It is not a legal requirement.",
       "topics": ["lock_in"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     },
     {
       "rule_id": "KA-015",
@@ -178,7 +178,7 @@
       "summary": "It is good practice for the agreement to say whether it can be renewed, how long before the end either side should tell the other, and whether the rent changes on renewal and by how much.",
       "applies_when": "General good practice. It is not a legal requirement.",
       "topics": ["renewal"],
-      "date_checked": "09/10/2026"
+      "date_checked": "2026-10-09"
     }
   ]
 }
