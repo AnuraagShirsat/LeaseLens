@@ -1,5 +1,5 @@
 # app.py
-# LeaseLens - Streamlit web app (step D4: Gaps screen added).
+# LeaseLens - Streamlit web app (step D6: Deposit Simulator screen added).
 # Run with:  streamlit run app.py
 
 import html
@@ -7,6 +7,9 @@ import html
 import streamlit as st
 
 from core.sample_data import get_sample_bundle, get_sample_rules
+from core.schema import Deduction
+from core.simulator import DISCLAIMER as SIM_DISCLAIMER
+from core.simulator import simulate
 
 # ---------------------------------------------------------------
 # Page setup (must be the first Streamlit call)
@@ -49,10 +52,37 @@ RULE_TYPE_NAMES = {
     "best_practice": "Best practice",
 }
 
+# Friendly names for the deduction categories (Deposit Simulator)
+CATEGORY_NAMES = {
+    "painting_repairs": "Painting and repairs",
+    "damage": "Damage",
+    "cleaning": "Cleaning",
+    "unpaid_rent": "Unpaid rent",
+    "utility_dues": "Utility bills",
+    "other": "Other",
+}
+
+# Colours and words for the simulator statuses
+STATUS_COLOURS = {
+    "supported": "#2e7d32",
+    "needs_clarification": "#ef6c00",
+    "review_further": "#d32f2f",
+}
+STATUS_NAMES = {
+    "supported": "Supported",
+    "needs_clarification": "Needs clarification",
+    "review_further": "Review further",
+}
+
 
 def topic_name(topic: str) -> str:
     """Turn a topic code like 'lock_in' into plain words."""
     return TOPIC_NAMES.get(topic, topic.replace("_", " ").title())
+
+
+def rupees(amount) -> str:
+    """Format a number like 48000 as 'Rs. 48,000'."""
+    return "Rs. " + format(amount, ",.0f")
 
 
 # ---------------------------------------------------------------
@@ -159,6 +189,12 @@ def severity_badge_html(severity: str) -> str:
     """A badge such as HIGH SEVERITY."""
     colour = RISK_COLOURS.get(severity, "#555555")
     return badge_html(colour, severity.upper() + " SEVERITY")
+
+
+def status_badge_html(status: str) -> str:
+    """A badge such as Supported (green) or Review further (red)."""
+    colour = STATUS_COLOURS.get(status, "#555555")
+    return badge_html(colour, STATUS_NAMES.get(status, status))
 
 
 def quote_html(text: str) -> str:
@@ -344,6 +380,185 @@ def show_gaps_tab() -> None:
 
 
 # ---------------------------------------------------------------
+# Deposit Simulator screen
+# ---------------------------------------------------------------
+def deductions_table_html(items) -> str:
+    """Build an HTML table of the deductions with coloured statuses."""
+    cell = "padding:6px 10px;border-bottom:1px solid #8884;vertical-align:top;"
+    head = (
+        "<tr>"
+        '<th style="' + cell + 'text-align:left;">Deduction</th>'
+        '<th style="' + cell + 'text-align:left;">Amount</th>'
+        '<th style="' + cell + 'text-align:left;">Status</th>'
+        '<th style="' + cell + 'text-align:left;">Why</th>'
+        "</tr>"
+    )
+    rows = ""
+    for item in items:
+        rows += (
+            "<tr>"
+            '<td style="' + cell + '">' + html.escape(item["label"]) + "</td>"
+            '<td style="' + cell + '">' + rupees(item["amount"]) + "</td>"
+            '<td style="' + cell + '">'
+            + status_badge_html(item["status"])
+            + "</td>"
+            '<td style="' + cell + '">' + html.escape(item["reason"]) + "</td>"
+            "</tr>"
+        )
+    return '<table style="width:100%;border-collapse:collapse;">' + head + rows + "</table>"
+
+
+def show_sim_results(result) -> None:
+    """Show the results of the last simulation run."""
+    st.markdown("### Results")
+
+    months = result["deposit_months_of_rent"]
+    if months is not None:
+        st.write("Your deposit is about **" + str(months) + " months of rent**.")
+
+    st.markdown(deductions_table_html(result["items"]), unsafe_allow_html=True)
+
+    st.markdown("### What may come back to you")
+    scenarios = result["scenarios"]
+    col_a, col_b, col_c = st.columns(3)
+
+    col_a.metric(
+        "Only supported deductions",
+        rupees(scenarios["tenant_favourable"]["amount_returned"]),
+    )
+    col_a.caption(
+        "Deducted: " + rupees(scenarios["tenant_favourable"]["total_deducted"])
+    )
+
+    col_b.metric(
+        "Supported + needs clarification",
+        rupees(scenarios["middle"]["amount_returned"]),
+    )
+    col_b.caption("Deducted: " + rupees(scenarios["middle"]["total_deducted"]))
+
+    col_c.metric(
+        "All deductions as proposed",
+        rupees(scenarios["as_proposed"]["amount_returned"]),
+    )
+    col_c.caption("Deducted: " + rupees(scenarios["as_proposed"]["total_deducted"]))
+
+
+def show_simulator_tab() -> None:
+    """The whole Deposit Simulator tab."""
+    st.subheader("Deposit Simulator")
+    st.write(
+        "Try out how much of your deposit may come back. "
+        "This is only a scenario estimate."
+    )
+
+    # Use the agreement's numbers if we have them, else simple defaults.
+    default_deposit = 60000.0
+    default_rent = 20000.0
+    clauses = []
+    bundle = st.session_state.get("bundle")
+    if bundle is not None:
+        clauses = bundle.extract.clauses
+        terms = bundle.extract.key_terms
+        if terms.security_deposit:
+            default_deposit = float(terms.security_deposit)
+        if terms.monthly_rent:
+            default_rent = float(terms.monthly_rent)
+
+    # The key changes when the default changes, so new data refills the box.
+    col_dep, col_rent = st.columns(2)
+    deposit = col_dep.number_input(
+        "Security deposit (Rs.)",
+        min_value=0.0,
+        value=default_deposit,
+        step=1000.0,
+        key="sim_deposit_" + str(int(default_deposit)),
+    )
+    rent = col_rent.number_input(
+        "Monthly rent (Rs.)",
+        min_value=0.0,
+        value=default_rent,
+        step=500.0,
+        key="sim_rent_" + str(int(default_rent)),
+    )
+
+    # Choices for the "linked clause" box
+    clause_labels = ["None"]
+    clause_id_by_label = {"None": None}
+    for clause in clauses:
+        label = clause.clause_id + ": " + clause.text[:50]
+        clause_labels.append(label)
+        clause_id_by_label[label] = clause.clause_id
+
+    st.markdown("### Deductions the landlord may propose")
+    count = st.number_input(
+        "How many deductions?",
+        min_value=1,
+        max_value=8,
+        value=1,
+        step=1,
+        key="sim_count",
+    )
+
+    deductions = []
+    for i in range(int(count)):
+        number = str(i + 1)
+        with st.container(border=True):
+            st.markdown("**Deduction " + number + "**")
+            col1, col2, col3 = st.columns(3)
+            label = col1.text_input("What is it for?", key="ded_label_" + number)
+            category = col2.selectbox(
+                "Kind of cost",
+                options=list(CATEGORY_NAMES.keys()),
+                format_func=lambda c: CATEGORY_NAMES[c],
+                key="ded_category_" + number,
+            )
+            amount = col3.number_input(
+                "Amount (Rs.)",
+                min_value=0.0,
+                value=0.0,
+                step=500.0,
+                key="ded_amount_" + number,
+            )
+            col4, col5 = st.columns(2)
+            chosen = col4.selectbox(
+                "Linked clause",
+                options=clause_labels,
+                key="ded_clause_" + number,
+            )
+            has_proof = col5.checkbox(
+                "I have bills, photos or other proof",
+                key="ded_proof_" + number,
+            )
+
+        if amount > 0:
+            if label.strip():
+                shown_label = label.strip()
+            else:
+                shown_label = "Deduction " + number
+            deductions.append(
+                Deduction(
+                    label=shown_label,
+                    category=category,
+                    amount=amount,
+                    linked_clause_id=clause_id_by_label[chosen],
+                    has_proof=has_proof,
+                )
+            )
+
+    if st.button("Run scenarios", type="primary"):
+        if not deductions:
+            st.warning("Please enter at least one deduction amount above 0.")
+        else:
+            st.session_state["sim_result"] = simulate(
+                deposit, rent, deductions, clauses
+            )
+
+    if "sim_result" in st.session_state:
+        show_sim_results(st.session_state["sim_result"])
+        st.info(SIM_DISCLAIMER)
+
+
+# ---------------------------------------------------------------
 # Sidebar
 # ---------------------------------------------------------------
 with st.sidebar:
@@ -415,8 +630,7 @@ with tab_gaps:
 
 # ----- Tab 4: Deposit Simulator -----
 with tab_sim:
-    st.subheader("Deposit Simulator")
-    st.write("Coming soon")
+    show_simulator_tab()
 
 # ----- Tab 5: Negotiator -----
 with tab_neg:
