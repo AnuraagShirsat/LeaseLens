@@ -1,11 +1,12 @@
 # app.py
-# LeaseLens - Streamlit web app (step D6: Deposit Simulator screen added).
+# LeaseLens - Streamlit web app (step D8: Negotiator screen added).
 # Run with:  streamlit run app.py
 
 import html
 
 import streamlit as st
 
+from core.negotiator import generate_drafts
 from core.sample_data import get_sample_bundle, get_sample_rules
 from core.schema import Deduction
 from core.simulator import DISCLAIMER as SIM_DISCLAIMER
@@ -559,6 +560,124 @@ def show_simulator_tab() -> None:
 
 
 # ---------------------------------------------------------------
+# Negotiator screen
+# ---------------------------------------------------------------
+def finding_label(finding) -> str:
+    """A short name for a finding, used in the choice box."""
+    return (
+        finding.clause_id
+        + " - "
+        + topic_name(finding.topic)
+        + " - "
+        + finding.risk
+        + " risk"
+    )
+
+
+def show_draft_box(title: str, text: str, name: str, finding_index: int, gen: int):
+    """Show one editable draft with the read-and-edited tick box."""
+    st.markdown("### " + title)
+    base_key = "neg_" + name + "_" + str(finding_index) + "_" + str(gen)
+
+    edited = st.text_area(
+        "Edit your " + title.lower() + " message",
+        value=text,
+        height=220,
+        key=base_key + "_text",
+        label_visibility="collapsed",
+    )
+
+    approved = st.checkbox(
+        "I have read and edited this message",
+        key=base_key + "_ok",
+    )
+
+    if approved:
+        st.caption("Copy it with the button at the top right of the box.")
+        st.code(edited, language=None, wrap_lines=True)
+        st.download_button(
+            "Download as a text file",
+            data=edited,
+            file_name="leaselens_" + name + "_message.txt",
+            mime="text/plain",
+            key=base_key + "_download",
+        )
+
+
+def show_negotiator_tab() -> None:
+    """The whole Negotiator tab."""
+    st.subheader("Negotiator")
+
+    if "bundle" not in st.session_state:
+        st.info("Upload an agreement first.")
+        return
+
+    bundle = st.session_state["bundle"]
+    findings = bundle.findings
+    if not findings:
+        st.info("There are no findings to write a message about.")
+        return
+
+    st.info(
+        "LeaseLens never sends anything. Read and edit the message first."
+    )
+
+    # Preselect the finding chosen with the "Draft a message" button.
+    wanted = st.session_state.get("negotiate_clause")
+    default_index = 0
+    for i, finding in enumerate(findings):
+        if finding.clause_id == wanted:
+            default_index = i
+            break
+
+    chosen = st.selectbox(
+        "Which finding do you want to write about?",
+        options=list(range(len(findings))),
+        index=default_index,
+        format_func=lambda i: finding_label(findings[i]),
+    )
+    finding = findings[chosen]
+
+    st.markdown("**What the agreement says**")
+    st.markdown(quote_html(finding.quoted_text), unsafe_allow_html=True)
+
+    terms = bundle.extract.key_terms
+
+    if st.button("Generate drafts", type="primary"):
+        with st.spinner("Writing your drafts. This can take a minute..."):
+            try:
+                drafts = generate_drafts(
+                    finding, terms.tenant_name, terms.landlord_name
+                )
+            except Exception as error:
+                st.error("Sorry, the drafts could not be written: " + str(error))
+            else:
+                store = st.session_state.setdefault("drafts", {})
+                old = store.get(chosen)
+                if old:
+                    gen = old["gen"] + 1
+                else:
+                    gen = 1
+                store[chosen] = {
+                    "friendly": drafts.friendly,
+                    "firm": drafts.firm,
+                    "compromise": drafts.compromise,
+                    "gen": gen,
+                }
+
+    saved = st.session_state.get("drafts", {}).get(chosen)
+    if saved is None:
+        st.write("Click 'Generate drafts' to get three messages you can edit.")
+        return
+
+    show_draft_box("Friendly", saved["friendly"], "friendly", chosen, saved["gen"])
+    show_draft_box("Firm", saved["firm"], "firm", chosen, saved["gen"])
+    show_draft_box(
+        "Compromise", saved["compromise"], "compromise", chosen, saved["gen"]
+    )
+
+
+# ---------------------------------------------------------------
 # Sidebar
 # ---------------------------------------------------------------
 with st.sidebar:
@@ -604,6 +723,7 @@ with tab_upload:
         if use_demo:
             # Demo mode: fake results, no AI needed.
             st.session_state["bundle"] = get_sample_bundle()
+            st.session_state.pop("drafts", None)
             st.success("Demo data loaded. Open the other tabs to look around.")
         else:
             files = list(uploaded_files or [])
@@ -615,6 +735,7 @@ with tab_upload:
                 bundle = run_real_analysis(files)
                 if bundle is not None:
                     st.session_state["bundle"] = bundle
+                    st.session_state.pop("drafts", None)
                     st.success("Analysis finished. Open the Findings tab.")
 
     if "bundle" in st.session_state:
@@ -634,8 +755,7 @@ with tab_sim:
 
 # ----- Tab 5: Negotiator -----
 with tab_neg:
-    st.subheader("Negotiator")
-    st.write("Coming soon")
+    show_negotiator_tab()
 
 # ----- Tab 6: Move-in Vault -----
 with tab_vault:
