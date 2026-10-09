@@ -1,21 +1,5 @@
-"""Knowledge base loader for lease rules and guidance.
-
-Loads a JSON file of `RuleEntry` objects into an in-memory index and exposes
-lookup helpers used by the analysis stage.
-
-Expected file shape:
-    {
-      "rules": [
-        { "rule_id": "...", "title": "...", ... },
-        ...
-      ]
-    }
-
-Loading is explicit via `load_rules()`. The lookup helpers (`rules_for_topic`,
-`get_rule`, `validate_rule_ids`) read the module-level cache that `load_rules`
-populates; if nothing has been loaded yet, they lazily load from
-`config.KB_PATH`.
-"""
+# core/rules.py
+"""Knowledge base loader for lease rules and guidance."""
 
 from __future__ import annotations
 
@@ -33,10 +17,6 @@ class RulesError(Exception):
     """Raised when the knowledge base can't be loaded or is invalid."""
 
 
-# --------------------------------------------------------------------------- #
-# Module-level cache
-# --------------------------------------------------------------------------- #
-
 _RULES: list[RuleEntry] = []
 _BY_ID: dict[str, RuleEntry] = {}
 _BY_TOPIC: dict[str, list[RuleEntry]] = {}
@@ -51,17 +31,7 @@ def _reset_cache() -> None:
     _LOADED = False
 
 
-# --------------------------------------------------------------------------- #
-# Loading
-# --------------------------------------------------------------------------- #
-
 def load_rules(path: str | Path | None = None) -> list[RuleEntry]:
-    """Load and index rules from a JSON file.
-
-    `path` defaults to `config.KB_PATH`. Raises `RulesError` with a clear
-    message if the file is missing, not valid JSON, or contains an invalid
-    entry (in which case the offending `rule_id` is named).
-    """
     if path is None:
         path = config.KB_PATH
     p = Path(path)
@@ -87,8 +57,6 @@ def load_rules(path: str | Path | None = None) -> list[RuleEntry]:
     seen: set[str] = set()
 
     for i, entry in enumerate(entries):
-        # Try to extract rule_id for a helpful error message even if the
-        # entry fails validation.
         rule_id_hint: str | None = None
         if isinstance(entry, dict):
             raw_id = entry.get("rule_id")
@@ -108,7 +76,6 @@ def load_rules(path: str | Path | None = None) -> list[RuleEntry]:
         seen.add(rule.rule_id)
         rules.append(rule)
 
-    # Commit to cache only on full success.
     global _RULES, _BY_ID, _BY_TOPIC, _LOADED
     _RULES = rules
     _BY_ID = {r.rule_id: r for r in rules}
@@ -124,34 +91,25 @@ def load_rules(path: str | Path | None = None) -> list[RuleEntry]:
 
 
 def _ensure_loaded() -> None:
-    """Lazily load from the default path if nothing is cached yet."""
     if not _LOADED:
         load_rules()
 
 
-# --------------------------------------------------------------------------- #
-# Lookup
-# --------------------------------------------------------------------------- #
-
 def rules_for_topic(topic: str) -> list[RuleEntry]:
-    """Return all rules whose `topics` list contains `topic`."""
     _ensure_loaded()
     return list(_BY_TOPIC.get(topic, []))
 
 
 def get_rule(rule_id: str) -> RuleEntry | None:
-    """Return the rule with `rule_id`, or None if not present."""
     _ensure_loaded()
     return _BY_ID.get(rule_id)
 
 
 def validate_rule_ids(ids: Iterable[str]) -> list[str]:
-    """Return only the ids that exist in the knowledge base, in input order."""
     _ensure_loaded()
     return [i for i in ids if i in _BY_ID]
 
 
 def all_rules() -> list[RuleEntry]:
-    """Return every loaded rule (handy for diagnostics and analysis)."""
     _ensure_loaded()
     return list(_RULES)
