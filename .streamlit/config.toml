@@ -1,0 +1,12 @@
+# LeaseLens theme: pure black with electric blue (Techflux style)
+[theme]
+base = "dark"
+primaryColor = "#0A63F0"
+backgroundColor = "#000000"
+secondaryBackgroundColor = "#0A0F1C"
+textColor = "#FFFFFF"
+font = "sans serif"
+
+[browser]
+# Do not send usage statistics anywhere (keeps data on your computer)
+gatherUsageStats = false
