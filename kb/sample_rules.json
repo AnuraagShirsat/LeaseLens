@@ -1,0 +1,28 @@
+{
+  "rules": [
+    {
+      "rule_id": "SAMPLE-001",
+      "title": "SAMPLE - NOT A REAL RULE: deposit cap",
+      "rule_type": "legal_requirement",
+      "source_name": "Sample source (fake, for tests only)",
+      "source_url": null,
+      "section": null,
+      "summary": "Placeholder entry used by tests. Not legal advice. Do not cite.",
+      "applies_when": "never",
+      "topics": ["deposit"],
+      "date_checked": "2026-01-01"
+    },
+    {
+      "rule_id": "SAMPLE-002",
+      "title": "SAMPLE - NOT A REAL RULE: notice period",
+      "rule_type": "best_practice",
+      "source_name": "Sample source (fake, for tests only)",
+      "source_url": null,
+      "section": null,
+      "summary": "Placeholder entry used by tests. Not legal advice. Do not cite.",
+      "applies_when": "never",
+      "topics": ["termination_notice", "lock_in"],
+      "date_checked": "2026-01-01"
+    }
+  ]
+}
