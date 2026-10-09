@@ -1,12 +1,26 @@
 # app.py
-# LeaseLens - Streamlit web app (step D3: Findings screen added).
+# LeaseLens - Streamlit web app (step D10: Move-in Vault screen added).
 # Run with:  streamlit run app.py
 
+import hashlib
 import html
+import uuid
 
 import streamlit as st
 
+from core.negotiator import generate_drafts
 from core.sample_data import get_sample_bundle, get_sample_rules
+from core.schema import Deduction
+from core.simulator import DISCLAIMER as SIM_DISCLAIMER
+from core.simulator import simulate
+from core.vault import (
+    agreement_checklist,
+    base_checklist,
+    delete_all,
+    export_report,
+    list_entries,
+    save_entry,
+)
 
 # ---------------------------------------------------------------
 # Page setup (must be the first Streamlit call)
@@ -18,7 +32,17 @@ DISCLAIMER = (
     "It is not legal advice. For legal advice, consult a qualified lawyer."
 )
 
-# Colours and words used on the Findings screen
+MISSING_NOTE = (
+    "A missing detail is not automatically a legal violation. "
+    "These are things you may want to ask to be written down."
+)
+
+VAULT_CONSENT = (
+    "I agree to store my notes and photos on this computer only, "
+    "in the vault_data folder. Nothing is uploaded anywhere."
+)
+
+# Colours and words used on the screens
 RISK_COLOURS = {"high": "#d32f2f", "medium": "#ef6c00", "low": "#2e7d32"}
 RISK_ORDER = {"high": 0, "medium": 1, "low": 2}
 
@@ -44,10 +68,37 @@ RULE_TYPE_NAMES = {
     "best_practice": "Best practice",
 }
 
+# Friendly names for the deduction categories (Deposit Simulator)
+CATEGORY_NAMES = {
+    "painting_repairs": "Painting and repairs",
+    "damage": "Damage",
+    "cleaning": "Cleaning",
+    "unpaid_rent": "Unpaid rent",
+    "utility_dues": "Utility bills",
+    "other": "Other",
+}
+
+# Colours and words for the simulator statuses
+STATUS_COLOURS = {
+    "supported": "#2e7d32",
+    "needs_clarification": "#ef6c00",
+    "review_further": "#d32f2f",
+}
+STATUS_NAMES = {
+    "supported": "Supported",
+    "needs_clarification": "Needs clarification",
+    "review_further": "Review further",
+}
+
 
 def topic_name(topic: str) -> str:
     """Turn a topic code like 'lock_in' into plain words."""
     return TOPIC_NAMES.get(topic, topic.replace("_", " ").title())
+
+
+def rupees(amount) -> str:
+    """Format a number like 48000 as 'Rs. 48,000'."""
+    return "Rs. " + format(amount, ",.0f")
 
 
 # ---------------------------------------------------------------
@@ -124,7 +175,7 @@ def run_real_analysis(files):
         page_images = load_pages(files)
         bundle = run_analysis(page_images, progress_cb)
     except Exception as error:
-        st.error(f"Sorry, the analysis did not work: {error}")
+        st.error("Sorry, the analysis did not work: " + str(error))
         return None
 
     progress_bar.progress(1.0)
@@ -133,17 +184,33 @@ def run_real_analysis(files):
 
 
 # ---------------------------------------------------------------
-# Helpers for the Findings screen
+# Small HTML helpers (badges and quote block)
 # ---------------------------------------------------------------
-def risk_badge_html(risk: str) -> str:
-    """A small coloured label such as HIGH RISK."""
-    colour = RISK_COLOURS.get(risk, "#555555")
+def badge_html(colour: str, label: str) -> str:
+    """A small coloured label."""
     style = (
         "background:" + colour + ";color:white;padding:2px 10px;"
         "border-radius:12px;font-size:0.8rem;font-weight:600;"
     )
-    label = html.escape(risk.upper()) + " RISK"
-    return '<span style="' + style + '">' + label + "</span>"
+    return '<span style="' + style + '">' + html.escape(label) + "</span>"
+
+
+def risk_badge_html(risk: str) -> str:
+    """A badge such as HIGH RISK."""
+    colour = RISK_COLOURS.get(risk, "#555555")
+    return badge_html(colour, risk.upper() + " RISK")
+
+
+def severity_badge_html(severity: str) -> str:
+    """A badge such as HIGH SEVERITY."""
+    colour = RISK_COLOURS.get(severity, "#555555")
+    return badge_html(colour, severity.upper() + " SEVERITY")
+
+
+def status_badge_html(status: str) -> str:
+    """A badge such as Supported (green) or Review further (red)."""
+    colour = STATUS_COLOURS.get(status, "#555555")
+    return badge_html(colour, STATUS_NAMES.get(status, status))
 
 
 def quote_html(text: str) -> str:
@@ -155,6 +222,9 @@ def quote_html(text: str) -> str:
     return '<div style="' + style + '">' + html.escape(text) + "</div>"
 
 
+# ---------------------------------------------------------------
+# Findings screen
+# ---------------------------------------------------------------
 def show_evidence(finding) -> None:
     """Show the Evidence box for one finding."""
     with st.container(border=True):
@@ -172,9 +242,8 @@ def show_evidence(finding) -> None:
                 if rule.section:
                     st.write("Section: " + rule.section)
                 if rule.source_url and rule.source_url.startswith("http"):
-                    st.markdown(
-                        "Source: [" + rule.source_name + "](" + rule.source_url + ")"
-                    )
+                    link = "[" + rule.source_name + "](" + rule.source_url + ")"
+                    st.markdown("Source: " + link)
                 else:
                     st.write("Source: " + rule.source_name)
                 st.write("Date checked: " + rule.date_checked)
@@ -274,6 +343,566 @@ def show_findings_tab() -> None:
 
 
 # ---------------------------------------------------------------
+# Gaps screen
+# ---------------------------------------------------------------
+def show_gap_card(gap) -> None:
+    """Draw one gap (conflict or missing detail) as a bordered card."""
+    with st.container(border=True):
+        heading = (
+            severity_badge_html(gap.severity)
+            + " &nbsp; <b>"
+            + html.escape(gap.title)
+            + "</b>"
+        )
+        st.markdown(heading, unsafe_allow_html=True)
+        st.write(gap.description)
+        if gap.related_clause_ids:
+            clauses_text = ", ".join(gap.related_clause_ids)
+        else:
+            clauses_text = "none"
+        st.write("Related clauses: " + clauses_text)
+
+
+def show_gaps_tab() -> None:
+    """The whole Gaps tab: conflicts first, then missing details."""
+    st.subheader("Gaps")
+
+    if "bundle" not in st.session_state:
+        st.info("Upload an agreement first.")
+        return
+
+    gaps = st.session_state["bundle"].gaps
+    conflicts = [g for g in gaps if g.kind == "conflict"]
+    missing = [g for g in gaps if g.kind == "missing"]
+    conflicts.sort(key=lambda g: RISK_ORDER.get(g.severity, 3))
+    missing.sort(key=lambda g: RISK_ORDER.get(g.severity, 3))
+
+    # Section 1: conflicts
+    st.markdown("### Details that disagree (conflicts)")
+    if conflicts:
+        for gap in conflicts:
+            show_gap_card(gap)
+    else:
+        st.success("Good news: no conflicting details were found.")
+
+    # Section 2: missing details
+    st.markdown("### Details that are missing")
+    st.caption(MISSING_NOTE)
+    if missing:
+        for gap in missing:
+            show_gap_card(gap)
+    else:
+        st.success("Good news: no missing details were found.")
+
+
+# ---------------------------------------------------------------
+# Deposit Simulator screen
+# ---------------------------------------------------------------
+def deductions_table_html(items) -> str:
+    """Build an HTML table of the deductions with coloured statuses."""
+    cell = "padding:6px 10px;border-bottom:1px solid #8884;vertical-align:top;"
+    head = (
+        "<tr>"
+        '<th style="' + cell + 'text-align:left;">Deduction</th>'
+        '<th style="' + cell + 'text-align:left;">Amount</th>'
+        '<th style="' + cell + 'text-align:left;">Status</th>'
+        '<th style="' + cell + 'text-align:left;">Why</th>'
+        "</tr>"
+    )
+    rows = ""
+    for item in items:
+        rows += (
+            "<tr>"
+            '<td style="' + cell + '">' + html.escape(item["label"]) + "</td>"
+            '<td style="' + cell + '">' + rupees(item["amount"]) + "</td>"
+            '<td style="' + cell + '">'
+            + status_badge_html(item["status"])
+            + "</td>"
+            '<td style="' + cell + '">' + html.escape(item["reason"]) + "</td>"
+            "</tr>"
+        )
+    return '<table style="width:100%;border-collapse:collapse;">' + head + rows + "</table>"
+
+
+def show_sim_results(result) -> None:
+    """Show the results of the last simulation run."""
+    st.markdown("### Results")
+
+    months = result["deposit_months_of_rent"]
+    if months is not None:
+        st.write("Your deposit is about **" + str(months) + " months of rent**.")
+
+    st.markdown(deductions_table_html(result["items"]), unsafe_allow_html=True)
+
+    st.markdown("### What may come back to you")
+    scenarios = result["scenarios"]
+    col_a, col_b, col_c = st.columns(3)
+
+    col_a.metric(
+        "Only supported deductions",
+        rupees(scenarios["tenant_favourable"]["amount_returned"]),
+    )
+    col_a.caption(
+        "Deducted: " + rupees(scenarios["tenant_favourable"]["total_deducted"])
+    )
+
+    col_b.metric(
+        "Supported + needs clarification",
+        rupees(scenarios["middle"]["amount_returned"]),
+    )
+    col_b.caption("Deducted: " + rupees(scenarios["middle"]["total_deducted"]))
+
+    col_c.metric(
+        "All deductions as proposed",
+        rupees(scenarios["as_proposed"]["amount_returned"]),
+    )
+    col_c.caption("Deducted: " + rupees(scenarios["as_proposed"]["total_deducted"]))
+
+
+def show_simulator_tab() -> None:
+    """The whole Deposit Simulator tab."""
+    st.subheader("Deposit Simulator")
+    st.write(
+        "Try out how much of your deposit may come back. "
+        "This is only a scenario estimate."
+    )
+
+    # Use the agreement's numbers if we have them, else simple defaults.
+    default_deposit = 60000.0
+    default_rent = 20000.0
+    clauses = []
+    bundle = st.session_state.get("bundle")
+    if bundle is not None:
+        clauses = bundle.extract.clauses
+        terms = bundle.extract.key_terms
+        if terms.security_deposit:
+            default_deposit = float(terms.security_deposit)
+        if terms.monthly_rent:
+            default_rent = float(terms.monthly_rent)
+
+    # The key changes when the default changes, so new data refills the box.
+    col_dep, col_rent = st.columns(2)
+    deposit = col_dep.number_input(
+        "Security deposit (Rs.)",
+        min_value=0.0,
+        value=default_deposit,
+        step=1000.0,
+        key="sim_deposit_" + str(int(default_deposit)),
+    )
+    rent = col_rent.number_input(
+        "Monthly rent (Rs.)",
+        min_value=0.0,
+        value=default_rent,
+        step=500.0,
+        key="sim_rent_" + str(int(default_rent)),
+    )
+
+    # Choices for the "linked clause" box
+    clause_labels = ["None"]
+    clause_id_by_label = {"None": None}
+    for clause in clauses:
+        label = clause.clause_id + ": " + clause.text[:50]
+        clause_labels.append(label)
+        clause_id_by_label[label] = clause.clause_id
+
+    st.markdown("### Deductions the landlord may propose")
+    count = st.number_input(
+        "How many deductions?",
+        min_value=1,
+        max_value=8,
+        value=1,
+        step=1,
+        key="sim_count",
+    )
+
+    deductions = []
+    for i in range(int(count)):
+        number = str(i + 1)
+        with st.container(border=True):
+            st.markdown("**Deduction " + number + "**")
+            col1, col2, col3 = st.columns(3)
+            label = col1.text_input("What is it for?", key="ded_label_" + number)
+            category = col2.selectbox(
+                "Kind of cost",
+                options=list(CATEGORY_NAMES.keys()),
+                format_func=lambda c: CATEGORY_NAMES[c],
+                key="ded_category_" + number,
+            )
+            amount = col3.number_input(
+                "Amount (Rs.)",
+                min_value=0.0,
+                value=0.0,
+                step=500.0,
+                key="ded_amount_" + number,
+            )
+            col4, col5 = st.columns(2)
+            chosen = col4.selectbox(
+                "Linked clause",
+                options=clause_labels,
+                key="ded_clause_" + number,
+            )
+            has_proof = col5.checkbox(
+                "I have bills, photos or other proof",
+                key="ded_proof_" + number,
+            )
+
+        if amount > 0:
+            if label.strip():
+                shown_label = label.strip()
+            else:
+                shown_label = "Deduction " + number
+            deductions.append(
+                Deduction(
+                    label=shown_label,
+                    category=category,
+                    amount=amount,
+                    linked_clause_id=clause_id_by_label[chosen],
+                    has_proof=has_proof,
+                )
+            )
+
+    if st.button("Run scenarios", type="primary"):
+        if not deductions:
+            st.warning("Please enter at least one deduction amount above 0.")
+        else:
+            st.session_state["sim_result"] = simulate(
+                deposit, rent, deductions, clauses
+            )
+
+    if "sim_result" in st.session_state:
+        show_sim_results(st.session_state["sim_result"])
+        st.info(SIM_DISCLAIMER)
+
+
+# ---------------------------------------------------------------
+# Negotiator screen
+# ---------------------------------------------------------------
+def finding_label(finding) -> str:
+    """A short name for a finding, used in the choice box."""
+    return (
+        finding.clause_id
+        + " - "
+        + topic_name(finding.topic)
+        + " - "
+        + finding.risk
+        + " risk"
+    )
+
+
+def show_draft_box(title: str, text: str, name: str, finding_index: int, gen: int):
+    """Show one editable draft with the read-and-edited tick box."""
+    st.markdown("### " + title)
+    base_key = "neg_" + name + "_" + str(finding_index) + "_" + str(gen)
+
+    edited = st.text_area(
+        "Edit your " + title.lower() + " message",
+        value=text,
+        height=220,
+        key=base_key + "_text",
+        label_visibility="collapsed",
+    )
+
+    approved = st.checkbox(
+        "I have read and edited this message",
+        key=base_key + "_ok",
+    )
+
+    if approved:
+        st.caption("Copy it with the button at the top right of the box.")
+        st.code(edited, language=None, wrap_lines=True)
+        st.download_button(
+            "Download as a text file",
+            data=edited,
+            file_name="leaselens_" + name + "_message.txt",
+            mime="text/plain",
+            key=base_key + "_download",
+        )
+
+
+def show_negotiator_tab() -> None:
+    """The whole Negotiator tab."""
+    st.subheader("Negotiator")
+
+    if "bundle" not in st.session_state:
+        st.info("Upload an agreement first.")
+        return
+
+    bundle = st.session_state["bundle"]
+    findings = bundle.findings
+    if not findings:
+        st.info("There are no findings to write a message about.")
+        return
+
+    st.info(
+        "LeaseLens never sends anything. Read and edit the message first."
+    )
+
+    # Preselect the finding chosen with the "Draft a message" button.
+    wanted = st.session_state.get("negotiate_clause")
+    default_index = 0
+    for i, finding in enumerate(findings):
+        if finding.clause_id == wanted:
+            default_index = i
+            break
+
+    chosen = st.selectbox(
+        "Which finding do you want to write about?",
+        options=list(range(len(findings))),
+        index=default_index,
+        format_func=lambda i: finding_label(findings[i]),
+    )
+    finding = findings[chosen]
+
+    st.markdown("**What the agreement says**")
+    st.markdown(quote_html(finding.quoted_text), unsafe_allow_html=True)
+
+    terms = bundle.extract.key_terms
+
+    if st.button("Generate drafts", type="primary"):
+        with st.spinner("Writing your drafts. This can take a minute..."):
+            try:
+                drafts = generate_drafts(
+                    finding, terms.tenant_name, terms.landlord_name
+                )
+            except Exception as error:
+                st.error("Sorry, the drafts could not be written: " + str(error))
+            else:
+                store = st.session_state.setdefault("drafts", {})
+                old = store.get(chosen)
+                if old:
+                    gen = old["gen"] + 1
+                else:
+                    gen = 1
+                store[chosen] = {
+                    "friendly": drafts.friendly,
+                    "firm": drafts.firm,
+                    "compromise": drafts.compromise,
+                    "gen": gen,
+                }
+
+    saved = st.session_state.get("drafts", {}).get(chosen)
+    if saved is None:
+        st.write("Click 'Generate drafts' to get three messages you can edit.")
+        return
+
+    show_draft_box("Friendly", saved["friendly"], "friendly", chosen, saved["gen"])
+    show_draft_box("Firm", saved["firm"], "firm", chosen, saved["gen"])
+    show_draft_box(
+        "Compromise", saved["compromise"], "compromise", chosen, saved["gen"]
+    )
+
+
+# ---------------------------------------------------------------
+# Move-in Vault screen
+# ---------------------------------------------------------------
+def item_key(area: str, item: str) -> str:
+    """A short, stable id for one checklist item (used in widget keys)."""
+    return hashlib.md5((area + "|" + item).encode("utf-8")).hexdigest()[:10]
+
+
+def group_by_area(items):
+    """Group checklist items by area, keeping the original order."""
+    groups = {}
+    for entry in items:
+        groups.setdefault(entry["area"], []).append(entry["item"])
+    return groups
+
+
+def show_checklist_item(session_id: str, area: str, item: str) -> None:
+    """One checklist item: a note box, a photo box and a Save button."""
+    key = item_key(area, item)
+    gens = st.session_state.setdefault("vault_gen", {})
+    counts = st.session_state.setdefault("vault_saved", {})
+    gen = gens.get(key, 0)
+    suffix = session_id + "_" + key + "_" + str(gen)
+
+    with st.container(border=True):
+        st.markdown("**" + item + "**")
+        note = st.text_input("Note (optional)", key="vnote_" + suffix)
+        photo = st.file_uploader(
+            "Photo (optional)",
+            type=["png", "jpg", "jpeg"],
+            key="vphoto_" + suffix,
+        )
+        if st.button("Save", key="vsave_" + suffix):
+            if not note.strip() and photo is None:
+                st.warning("Please add a note or a photo first.")
+            else:
+                photo_bytes = None
+                if photo is not None:
+                    photo_bytes = photo.getvalue()
+                try:
+                    save_entry(session_id, area, item, note.strip(), photo_bytes)
+                except Exception as error:
+                    st.error("Sorry, this could not be saved: " + str(error))
+                else:
+                    counts[key] = counts.get(key, 0) + 1
+                    gens[key] = gen + 1
+                    st.rerun()
+        if counts.get(key, 0) > 0:
+            st.success("✅ Saved (" + str(counts[key]) + ")")
+
+
+def show_saved_entries(session_id: str) -> None:
+    """List everything saved so far, with small photos."""
+    entries = list_entries(session_id)
+    title = "What I have saved so far (" + str(len(entries)) + ")"
+    with st.expander(title):
+        if not entries:
+            st.write("Nothing saved yet.")
+        for entry in entries:
+            st.markdown("**" + entry["saved_at"] + " - " + entry["area"] + "**")
+            st.write(entry["item"])
+            if entry["note"]:
+                st.write("Note: " + entry["note"])
+            if entry["photo_path"]:
+                st.image(entry["photo_path"], width=200)
+            st.divider()
+
+
+def show_terms_form(session_id: str):
+    """The agreed-terms form. Returns a dictionary for the report."""
+    st.markdown("### Agreed details for the report")
+
+    default_rent = 0.0
+    default_deposit = 0.0
+    bundle = st.session_state.get("bundle")
+    if bundle is not None:
+        terms = bundle.extract.key_terms
+        if terms.monthly_rent:
+            default_rent = float(terms.monthly_rent)
+        if terms.security_deposit:
+            default_deposit = float(terms.security_deposit)
+
+    col1, col2 = st.columns(2)
+    rent = col1.number_input(
+        "Monthly rent (Rs.)",
+        min_value=0.0,
+        value=default_rent,
+        step=500.0,
+        key="vterm_rent_" + session_id + "_" + str(int(default_rent)),
+    )
+    deposit = col2.number_input(
+        "Security deposit (Rs.)",
+        min_value=0.0,
+        value=default_deposit,
+        step=1000.0,
+        key="vterm_deposit_" + session_id + "_" + str(int(default_deposit)),
+    )
+    maintenance = st.text_input(
+        "Who pays for maintenance and repairs?",
+        key="vterm_maint_" + session_id,
+    )
+    col3, col4, col5 = st.columns(3)
+    keys_given = col3.text_input(
+        "Keys handed over", key="vterm_keys_" + session_id
+    )
+    electricity = col4.text_input(
+        "Electricity meter reading", key="vterm_elec_" + session_id
+    )
+    water = col5.text_input(
+        "Water meter reading", key="vterm_water_" + session_id
+    )
+
+    return {
+        "monthly_rent": rent if rent > 0 else None,
+        "security_deposit": deposit if deposit > 0 else None,
+        "maintenance_responsibility": maintenance.strip() or None,
+        "keys_handed_over": keys_given.strip() or None,
+        "electricity_meter": electricity.strip() or None,
+        "water_meter": water.strip() or None,
+    }
+
+
+def show_vault_buttons(session_id: str, agreed_terms: dict) -> None:
+    """The report button, the download button and the delete button."""
+    st.markdown("### Your move-in condition report")
+    st.write(
+        "Click 'Create my report' after you have saved your entries. "
+        "If you save more later, create it again."
+    )
+
+    if st.button("Create my report", type="primary", key="vault_make_pdf"):
+        try:
+            st.session_state["vault_pdf"] = export_report(
+                session_id, agreed_terms
+            )
+        except Exception as error:
+            st.error("Sorry, the report could not be made: " + str(error))
+
+    if "vault_pdf" in st.session_state:
+        st.download_button(
+            "Download move-in condition report (PDF)",
+            data=st.session_state["vault_pdf"],
+            file_name="move_in_condition_report.pdf",
+            mime="application/pdf",
+            key="vault_download_pdf",
+        )
+
+    st.markdown("### Delete my data")
+    if st.button("Delete all my vault data", key="vault_delete"):
+        st.session_state["vault_confirm_delete"] = True
+
+    if st.session_state.get("vault_confirm_delete"):
+        st.warning(
+            "This will permanently delete every note and photo you saved "
+            "in this vault. This cannot be undone."
+        )
+        col_yes, col_no = st.columns(2)
+        if col_yes.button("Yes, delete everything", key="vault_delete_yes"):
+            try:
+                delete_all(session_id)
+            except Exception as error:
+                st.error("Sorry, the data could not be deleted: " + str(error))
+            else:
+                for name in ("vault_saved", "vault_gen", "vault_pdf",
+                             "vault_confirm_delete", "vault_session"):
+                    st.session_state.pop(name, None)
+                st.rerun()
+        if col_no.button("No, keep my data", key="vault_delete_no"):
+            st.session_state["vault_confirm_delete"] = False
+            st.rerun()
+
+
+def show_vault_tab() -> None:
+    """The whole Move-in Vault tab."""
+    st.subheader("Move-in Vault")
+    st.write(
+        "Record the condition of your new home on the day you move in. "
+        "Notes and photos can help if there is a disagreement about "
+        "your deposit later."
+    )
+
+    # Nothing else is shown until the person agrees.
+    agreed = st.checkbox(VAULT_CONSENT, key="vault_consent")
+    if not agreed:
+        return
+
+    if "vault_session" not in st.session_state:
+        st.session_state["vault_session"] = uuid.uuid4().hex[:12]
+    session_id = st.session_state["vault_session"]
+
+    # Checklist = agreement-specific items first, then the standard ones.
+    items = []
+    bundle = st.session_state.get("bundle")
+    if bundle is not None:
+        items = items + agreement_checklist(bundle)
+    items = items + base_checklist()
+
+    st.markdown("### Move-in checklist")
+    groups = group_by_area(items)
+    for area, rows in groups.items():
+        is_first = area == "From this agreement"
+        with st.expander(area, expanded=is_first):
+            for item in rows:
+                show_checklist_item(session_id, area, item)
+
+    show_saved_entries(session_id)
+    agreed_terms = show_terms_form(session_id)
+    show_vault_buttons(session_id, agreed_terms)
+
+
+# ---------------------------------------------------------------
 # Sidebar
 # ---------------------------------------------------------------
 with st.sidebar:
@@ -319,6 +948,7 @@ with tab_upload:
         if use_demo:
             # Demo mode: fake results, no AI needed.
             st.session_state["bundle"] = get_sample_bundle()
+            st.session_state.pop("drafts", None)
             st.success("Demo data loaded. Open the other tabs to look around.")
         else:
             files = list(uploaded_files or [])
@@ -330,6 +960,7 @@ with tab_upload:
                 bundle = run_real_analysis(files)
                 if bundle is not None:
                     st.session_state["bundle"] = bundle
+                    st.session_state.pop("drafts", None)
                     st.success("Analysis finished. Open the Findings tab.")
 
     if "bundle" in st.session_state:
@@ -341,23 +972,19 @@ with tab_findings:
 
 # ----- Tab 3: Gaps -----
 with tab_gaps:
-    st.subheader("Gaps")
-    st.write("Coming soon")
+    show_gaps_tab()
 
 # ----- Tab 4: Deposit Simulator -----
 with tab_sim:
-    st.subheader("Deposit Simulator")
-    st.write("Coming soon")
+    show_simulator_tab()
 
 # ----- Tab 5: Negotiator -----
 with tab_neg:
-    st.subheader("Negotiator")
-    st.write("Coming soon")
+    show_negotiator_tab()
 
 # ----- Tab 6: Move-in Vault -----
 with tab_vault:
-    st.subheader("Move-in Vault")
-    st.write("Coming soon")
+    show_vault_tab()
 
 # ---------------------------------------------------------------
 # Footer
