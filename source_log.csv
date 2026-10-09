@@ -1,0 +1,16 @@
+Row,Rule ID,What the rule covers,Source,Section,Official link,Date checked (you type),Compared with official page? (Y/N),Notes
+1,KA-001,Written agreement,Karnataka Rent Act 1999,s4,https://www.indiacode.nic.in/bitstream/123456789/7810/1/34_of_2001_e.pdf,FILL IN,,Act text shown as amended up to Act 07 of 2026
+2,KA-002,Where the Act applies,Karnataka Rent Act 1999,s2 and First Schedule,https://www.indiacode.nic.in/bitstream/123456789/7810/1/34_of_2001_e.pdf,FILL IN,,Depends on area / rent limits / building age / use - app must say "may apply"
+3,KA-003,Tenant duties (repairs / damage / inspection after notice),Karnataka Rent Act 1999,s48,https://www.indiacode.nic.in/bitstream/123456789/7810/1/34_of_2001_e.pdf,FILL IN,,
+4,KA-004,Landlord repair duty (subject to written contract),Karnataka Rent Act 1999,s47,https://www.indiacode.nic.in/bitstream/123456789/7810/1/34_of_2001_e.pdf,FILL IN,,Labelled contract_guidance
+5,KA-005,No cutting off essential supply or service,Karnataka Rent Act 1999,s49,https://www.indiacode.nic.in/bitstream/123456789/7810/1/34_of_2001_e.pdf,FILL IN,,
+6,KA-006,Other charges besides rent,Karnataka Rent Act 1999,s8,https://www.indiacode.nic.in/bitstream/123456789/7810/1/34_of_2001_e.pdf,FILL IN,,
+7,KA-007,Sub-letting needs written consent,Karnataka Rent Act 1999,s32,https://www.indiacode.nic.in/bitstream/123456789/7810/1/34_of_2001_e.pdf,FILL IN,,
+8,KA-008,Eviction only on listed grounds,Karnataka Rent Act 1999,"s27(1) and (2)(a),(c),(q)",https://www.indiacode.nic.in/bitstream/123456789/7810/1/34_of_2001_e.pdf,FILL IN,,
+9,KA-009,How rent may be increased,Karnataka Rent Act 1999,s6 and Third Schedule,https://www.indiacode.nic.in/bitstream/123456789/7810/1/34_of_2001_e.pdf,FILL IN,,Labelled contract_guidance
+10,KA-010,"Rent due date, interest on default, written receipt",Karnataka Rent Act 1999,s16,https://www.indiacode.nic.in/bitstream/123456789/7810/1/34_of_2001_e.pdf,FILL IN,,
+11,KA-011,Default notice period for month-to-month lease,Transfer of Property Act 1882,s106,https://indiacode.gov.in/pdf-viewer/2b436b95-ae89-4c5f-ab70-3d5ef5ffd8e8/df9f8770-4efe-4cf9-85ba-1ea884649679,FILL IN,,My pasted text was cut off mid sub-section (4) - re-check the full section on the official page. Labelled contract_guidance
+12,KA-012,Which leases need a registered instrument,Transfer of Property Act 1882,s107,https://indiacode.gov.in/pdf-viewer/2b436b95-ae89-4c5f-ab70-3d5ef5ffd8e8/df9f8770-4efe-4cf9-85ba-1ea884649679,FILL IN,,s107 is about registration only; stamp duty and Registration Act 1908 NOT covered yet
+13,KA-013,Deposit and deductions,LeaseLens team guidance (not a legal source),n/a,none,n/a,n/a,No verified source. Karnataka Rent Act: no security deposit section found. Best practice only
+14,KA-014,Lock-in,LeaseLens team guidance (not a legal source),n/a,none,n/a,n/a,Best practice only
+15,KA-015,Renewal,LeaseLens team guidance (not a legal source),n/a,none,n/a,n/a,Best practice only
